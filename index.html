@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuminaReader - Deep Text Deconstructor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+
+<body class="theme-dark">
+    <div id="app">
+        <nav class="navbar">
+            <div class="logo">
+                <span class="logo-text">LuminaReader</span>
+            </div>
+            <div class="nav-controls">
+                <div id="processing-status" class="status-indicator">
+                    <span class="status-label">Standby</span>
+                </div>
+                <button id="toggle-chat" class="btn-icon">💬</button>
+                <button id="settings-btn" class="btn-icon">⚙️</button>
+            </div>
+        </nav>
+
+        <main class="main-container">
+            <!-- Sidebar: Chapter List & Status -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h3>Manuscript</h3>
+                    <span id="total-chapters" class="badge">0</span>
+                </div>
+                <ul id="chapter-list" class="chapter-list">
+                    <!-- Chapters populated via JS -->
+                </ul>
+            </aside>
+
+            <!-- Main Workspace: Text & Analysis -->
+            <section class="workspace">
+                <div class="pane-content">
+                    <div id="reader-title" class="reader-title">Select a chapter to begin</div>
+                    <div id="reader-body" class="reader-body">
+                        <!-- Chapter text goes here -->
+                    </div>
+                </div>
+
+                <div class="pane-analysis">
+                    <div class="analysis-header">
+                        <h3>Analysis Workshop</h3>
+                        <div id="analysis-status"></div>
+                    </div>
+                    <div class="analysis-scroll">
+                        <div class="analysis-card">
+                            <h4>Chapter Summary</h4>
+                            <textarea id="chapter-summary" class="summary-edit"
+                                placeholder="AI summary will appear here..."></textarea>
+                        </div>
+
+                        <div class="analysis-card">
+                            <h4>Entities Discovered</h4>
+                            <div id="entity-list" class="entity-list">
+                                <!-- Entity tags go here -->
+                            </div>
+                            <button id="add-entity" class="btn-add-small">+ Add Entity</button>
+                        </div>
+
+                        <div class="analysis-card">
+                            <h4>Key Plot Points (one per line)</h4>
+                            <textarea id="plot-points-edit" class="summary-edit"
+                                placeholder="Edit key events here, one per line..."></textarea>
+                        </div>
+
+                        <div class="action-bar">
+                            <button id="save-analysis" class="btn-primary">Verify & Sync Knowledge</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Chat Bot Interface -->
+        <div id="chat-widget" class="chat-container hidden">
+            <div class="chat-header">
+                <h4>Lumina Expert</h4>
+                <button id="close-chat" class="btn-close">×</button>
+            </div>
+            <div id="chat-messages" class="chat-messages">
+                <div class="msg bot">Hello! I am analysis the text. Ask me anything about the story so far.</div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chat-msg-input" placeholder="Ask about the plot, characters...">
+                <button id="send-chat" class="btn-icon">🚀</button>
+            </div>
+        </div>
+        <!-- Entity Modal -->
+        <div id="entity-modal" class="modal-overlay hidden">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h4>Add New Knowledge Entity</h4>
+                    <button class="btn-close" id="close-entity-modal">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <label>Entity Name</label>
+                        <input type="text" id="new-ent-name" placeholder="e.g. 秦宇">
+                    </div>
+                    <div class="input-group">
+                        <label>Entity Type</label>
+                        <select id="new-ent-type">
+                            <option value="person">Person (角色)</option>
+                            <option value="location">Location (地点)</option>
+                            <option value="item">Item (物品/功法)</option>
+                            <option value="organization">Organization (组织)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Description</label>
+                        <textarea id="new-ent-desc" placeholder="Brief background story..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="submit-entity" class="btn-primary">Append to Knowledge Base</button>
+                </div>
+            </div>
+        </div>
+
+        <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
