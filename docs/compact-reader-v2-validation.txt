@@ -1,33 +1,30 @@
 LuminaReader V2 design verification — 2026-11-19
-Status: DESIGN PROPOSAL ONLY; no paid model calls or runtime migration.
-Runnable baseline: v1.0.0-reader-baseline / 4c3396de3dc3216c00ac17d4f57f41d8c8a550c7.
-Baseline validation: 69 offline unit tests, Vite build and whitespace checks passed before checkpoint push.
+Status: DESIGN PROPOSAL ONLY. Runtime remains on the saved baseline.
+Baseline: v1.0.0-reader-baseline / 4c3396de3dc3216c00ac17d4f57f41d8c8a550c7.
+Historical baseline checks: 69 offline unit tests and Vite build passed before the baseline push.
 
-Actual design verification:
-- 8 sections, 5 XML-parsed inline SVG figures, unique HTML/SVG IDs and local links.
-- Desktop 1600px and mobile 390px rendered in isolated Chromium; no horizontal page overflow.
-- Diagram text bounds, expandable prompt fragments and 48-case filtering checked.
-- No document network dependencies; stylesheet and figures embedded.
-- 12 proposed object schemas parsed; internal references, required fields and chapter-ID types checked.
-- No external JSON Schema conformance engine was installed or claimed.
-- 12 skill specifications and 48 NOT_RUN cases across 12 families; no V2 accuracy or saving measured.
+Design checks performed:
+- Both design builders run locally and their Python syntax checks pass.
+- 8 sections and 5 XML-parsed inline SVG figures; unique IDs and valid internal anchors.
+- Desktop 1600px and mobile 390px render without horizontal page overflow.
+- Diagram text stays inside SVG bounds; the complete harness loop was visually reviewed.
+- Body background, hero gradient and primary text/brand colors match the reference document's computed styles.
+- 48-case filtering and expandable prompt fragments work; no page errors or network dependencies.
+- 12 object schemas, 12 skill specifications, 3 reading depths, and 48 NOT_RUN cases across 12 families parse correctly.
+- Added controller-loop policy agrees with the documented actions, queue, budget inheritance and outcomes.
+- No external JSON Schema conformance engine was used; parsing does not establish semantic correctness.
+- No V2 model accuracy, latency, cost reduction or full-book preprocessing result is claimed.
 
-Separate reader-view semantic review and revisions:
-- Replaced vague time/layer wording with story time, revelation position and character knowledge.
-- Added canonical entity identity; unnamed roles bind to event/mention evidence, not generic labels.
-- Unified coverage chapter IDs as integers; preserved immutable source-span and index revisions.
-- Defined read-through progress rather than treating an opened chapter as fully known.
-- Kept counterfactuals out of factual Claim contracts and opinions out of canonical facts.
-- Stated embedding/preprocessing costs, unknown historical metrics and no automatic GPT reference reruns.
-- Marked thresholds as acceptance targets; cost targets cannot override evidence quality.
-- Collapsed long navigation on mobile after visual review.
-
-Collaboration boundary:
-- Existing concurrent edits to docs/reader-architecture.html were preserved and not included in this design commit.
-- Application source and private book data were not refactored by this proposal.
+Editorial checks:
+- academic-humanizer skill 1.3 applied after content expansion; reader text reviewed separately from working notes.
+- compare --changes passes: 160 numeric items unchanged, qualifier markers 13 -> 13.
+- No new capitalized terms, quoted strings or evidence placeholders in the wording revision.
+- Cost formula and key interface identifiers checked separately; retained technical limits explain proposed behavior.
+- No authoring-session references in the reader-facing document.
 
 Artifact SHA-256:
-compact-reader-v2.html: 2dd61af56bc71bffaca90fe3355d9d4476ea9e8a229f1f88c38ac72228071745
+compact-reader-v2.html: 57a12f2780734849d272a6e954c0bc76a0e86277f8228c3c64d7945613efd4dd
 compact-reader-v2-contracts.json: dc8e470ae45b8c539cbe2b52081c8850f2e943874d5bca075068c379c7169a80
-compact-reader-v2-policy.json: d20ec05346b6fb8d15570ae797496a2a4390814854b18d72fcae31f9ff50eaea
+compact-reader-v2-policy.json: 625ef60357427fde77aba21346b30f0def39c352a26755a80cb6524eacbe7b78
 compact-reader-v2-evaluation.json: 744a88de2959e12f42039f1db4a1076c12c33962d78e28e1914633b1089ec010
+design-assets/reader-theme.css: a77c9fb80e2a642d488c2575c3d21ca06819ce7b7fd2d3bcdd894c2a94aa3deb

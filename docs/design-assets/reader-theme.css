@@ -1,0 +1,35 @@
+/* Unified document palette — aligned with the Agent Loop figure. */
+:root{--bg:#f4f6f2;--ink:#243b31;--ink-soft:#3c5145;--muted:#728078;--border:#dce4dc;
+--p1:#3d6954;--p1-bg:#edf4ee;--p1-border:#cddbd2;--p2:#536b5e;--p2-bg:#f1f5f2;--p2-border:#d4ded7;
+--p3:#3d6954;--p3-bg:#edf4ee;--p3-border:#cddbd2;--base:#3d6954;
+--warn:#a57a40;--warn-bg:#fcf8f1;--warn-border:#ddcbb0;--ok:#3d6954;--ok-bg:#f0f5f1;
+--code-bg:#263c31;--code-ink:#edf3ee;}
+header.hero{background:linear-gradient(125deg,#284b3a 0%,#355f4b 56%,#507861 100%);box-shadow:0 12px 28px rgba(34,67,46,.13);}
+section.card{box-shadow:0 1px 3px rgba(34,67,46,.025);}
+section.card .sec-badge{background:#3d6954;}
+section.card .sec-tag{background:#edf3ee;color:#526a5a;}
+section.card h3.sec-h3{color:#3d6954;border-left-color:#8da795;}
+.sec-head{border-bottom-color:#dce5dd;}
+.note{background:#f0f5f1;border-left-color:#91a99a;color:#3c5948;}
+.note strong,.note.ok-note strong{color:#355f48;}
+.note.ok-note{background:#f0f5f1;border-left-color:#698e76;color:#355b43;}
+.note.warn-note{background:#fcf8f1;border-left-color:#b18b55;color:#80613a;}
+.note.warn-note strong{color:#76562e;}
+code,td code,th code,p code,li code,.source-link code{background:#edf3ee;color:#3d6650;}
+pre code{color:inherit;background:transparent;}
+th{background:#eff4ef;color:#3c5145;}
+.source-link{color:#3d6954;}
+.toc-status strong{color:#3d6954;}
+.fig{border-color:#dbe4dd;}
+.model-highlight .model-node rect{stroke:#54769c;stroke-width:4;}
+.model-highlight .model-node text{fill:#385c82;}
+#main-flow.model-highlight .model-node rect{stroke:#83bdff;stroke-width:4;}
+#main-flow.model-highlight .model-node text{fill:#ffffff;}
+summary{color:#526658;}
+.checklist input[type=checkbox],.diagram-toolbar input{accent-color:#3d6954;}
+@media print{header.hero{background:#355f4b!important;}}
+a {color:var(--p1)}
+.case-controls input:focus {outline:2px solid #91a99a;outline-offset:2px}
+.loop-fig svg {min-width:780px}
+pre {font-size:13px;line-height:1.75}
+

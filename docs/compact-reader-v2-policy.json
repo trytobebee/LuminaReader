@@ -2,6 +2,70 @@
   "status": "PROPOSED_NOT_ACTIVE",
   "baseline_tag": "v1.0.0-reader-baseline",
   "baseline_commit": "4c3396de3dc3216c00ac17d4f57f41d8c8a550c7",
+  "controller_loop": {
+    "status": "PROPOSED_EXTENSION_OF_BASELINE_LOOP",
+    "actions": [
+      "execute",
+      "answer",
+      "clarify"
+    ],
+    "calls_per_execute": {
+      "minimum": 1,
+      "maximum": 4,
+      "execution": "sequential; prior result references allowed"
+    },
+    "persisted_state_groups": [
+      "goal_and_discussion_dependencies",
+      "scope_and_revisions",
+      "evidence_and_facet_coverage",
+      "evidence_requirements_and_gaps",
+      "pending_calls_and_received_decision",
+      "actual_usage_and_reservations"
+    ],
+    "transitions": [
+      {
+        "when": "valid answer cache",
+        "next": "return cached answer with zero new model usage"
+      },
+      {
+        "when": "pending calls exist",
+        "next": "validate, execute cached tool, merge observations, checkpoint; drain before controller"
+      },
+      {
+        "when": "pending queue empty",
+        "next": "assemble bounded observation; reuse pending_final or invoke controller"
+      },
+      {
+        "when": "invalid action or tool arguments",
+        "next": "append error observation; invalidate pending calls; replan"
+      },
+      {
+        "when": "final answer has blocking evidence gaps",
+        "next": "append specific gaps; retrieve compact or source as needed"
+      },
+      {
+        "when": "final requirements met",
+        "next": "answered, partial with explicit limits, or clarification"
+      },
+      {
+        "when": "authorized limit exhausted or repeated no progress",
+        "next": "persist checkpoint; render confirmed records and gaps without a new paid summary"
+      }
+    ],
+    "semantic_check_limit": "Exact quotes, hashes and coverage are deterministic checks; entailment requires source-grounded extraction or targeted semantic review and remains subject to evaluation.",
+    "deep_jobs_share_parent_authorization": true,
+    "unknown_request_completion": "Keep reservation, operation ID and unknown usage; do not promise exactly-once execution across APIs.",
+    "baseline_default_limits_not_v2_measurements": {
+      "max_calls": 8,
+      "max_decisions": 8,
+      "max_steps": 24,
+      "max_source_chars": 180000,
+      "max_input_chars": 60000,
+      "max_output_tokens": 5000,
+      "max_cost_usd": 0.5,
+      "repeated_seen_results_stop": 3
+    }
+  },
   "mode_policy": [
     {
       "mode": "compact",
@@ -282,7 +346,6 @@
     "check_gpu_and_existing_jobs_before_launch": true
   },
   "cost_policy": {
-    "no_model_calls_during_design": true,
     "reuse_existing_analyses_as_candidates": true,
     "never_promote_old_summaries_to_source_truth": true,
     "do_not_rerun_gpt_for_reference_answers": true,
