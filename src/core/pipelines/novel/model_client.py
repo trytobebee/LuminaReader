@@ -73,6 +73,28 @@ def read_api_response(response):
     raise ConnectionError("OpenAI stream ended before completion")
 
 
+def count_openai_input(messages, response_format):
+    """Count the same model/input/format without generating an answer.
+
+    https://developers.openai.com/api/docs/guides/token-counting
+    """
+    payload={"model":MODEL,"input":messages,"reasoning":{"effort":REASONING},
+             "text":{"format":response_format}}
+    request=Request("https://api.openai.com/v1/responses/input_tokens",
+        data=json.dumps(payload,ensure_ascii=False).encode(),
+        headers={"Authorization":"Bearer "+read_openai_key(),"Content-Type":"application/json"})
+    try:
+        with build_opener(NoRedirect()).open(request,timeout=30) as response:
+            result=json.load(response)
+    except HTTPError as error:
+        code=error.code;error.close()
+        raise OSError(f"OpenAI input-token count HTTP {code}") from None
+    value=result.get("input_tokens")
+    if result.get("object")!="response.input_tokens" or type(value) is not int or value<0:
+        raise ValueError("Invalid OpenAI input-token count")
+    return value
+
+
 def openai_completion(messages, tokens, response_format, length_error):
     payload = {
         "model": MODEL,

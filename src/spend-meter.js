@@ -34,6 +34,9 @@ export class SpendMeter {
             catalog: '正在查阅目录', search: '正在寻找线索', read: '正在阅读原文',
             scan: '正在核对章节', extract: '正在整理证据', aggregate: '正在合并记录',
             composing: '正在整理回答',
+            get_context: '正在查看剧情阶段', search_knowledge: '正在检索事件与人物状态',
+            get_records: '正在连接跨章记录', get_evidence: '正在取回原文依据',
+            get_outcomes: '正在核对人物结局', typed_compute: '正在去重与统计',
         };
         if (result?.cache_hit) this.notice = '复用已有回答 · 本次未新增用量';
         else if (result?.status === 'failed') this.notice = '本轮未完成 · 已返回用量仍计入';

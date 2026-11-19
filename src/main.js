@@ -2,7 +2,7 @@ import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import { SpendMeter } from './spend-meter.js';
 
-const API_BASE = 'http://localhost:5001/api';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5001/api';
 
 class LuminaApp {
     constructor() {
@@ -343,7 +343,8 @@ class LuminaApp {
             const response = await this.request(`/model`);
             if (response.ok) {
                 const data = await response.json();
-                document.getElementById('chat-model').textContent = data.model;
+                document.getElementById('chat-model').textContent = (data.reader_version === 'v2' ? 'V2 · ' : '') + data.model;
+                if (data.reader_version === 'v2') document.title = 'Lumina V2 · 小石寨104章试点';
             }
         } catch (error) {
             console.warn('Model status unavailable');

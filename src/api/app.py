@@ -14,6 +14,12 @@ from src.core.pipelines.novel import search, chat_runtime
 from src.core.pipelines.novel.reader_workflows import VERSION, WorkflowStore
 from src.core.pipelines.novel.model_client import MODEL, PROVIDER
 from src.core.pipelines.novel.spending import Spending
+from pathlib import Path
+
+READER_VERSION = os.getenv("LUMINA_READER_VERSION", "v1")
+if READER_VERSION == "v2":
+    from src.core.pipelines.novel import compact_runtime as chat_runtime
+    from src.core.pipelines.novel.compact_index import VERSION, index_path
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 64 * 1024 * 1024
@@ -37,9 +43,23 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+
+def compact_chapter_payloads(database):
+    if READER_VERSION!='v2':return {}
+    path=index_path(database)
+    if not path.exists():return {}
+    with closing(sqlite3.connect(path)) as conn:
+        return {row[0]:json.loads(row[1]) for row in conn.execute('SELECT chapter_index,payload FROM chapters')}
+
 @app.get("/api/documents")
 def document_library():
-    return jsonify(documents.list_documents(DB_PATH))
+    result=documents.list_documents(DB_PATH)
+    if READER_VERSION=='v2':
+        for doc in result:
+            if doc['id']=='default':
+                doc['title']='超品相师 · 小石寨104章试点'
+                doc['analyzed_count']=len(compact_chapter_payloads(DB_PATH))
+    return jsonify(result)
 
 
 @app.post("/api/documents")
@@ -60,7 +80,34 @@ def document_too_large(error):
 
 @app.get("/api/model")
 def active_model():
-    return jsonify({"model": MODEL, "provider": PROVIDER, "harness": VERSION})
+    return jsonify({"model": MODEL, "provider": PROVIDER, "harness": VERSION,"reader_version":READER_VERSION})
+
+
+@app.get("/api/compact/status")
+def compact_status():
+    if READER_VERSION != "v2":
+        return jsonify({"available":False,"reader_version":"v1"})
+    path=index_path(active_database())
+    if not path.exists():return jsonify({"available":False,"status":"not_started"})
+    with sqlite3.connect(path) as conn:
+        row=conn.execute("SELECT value FROM meta WHERE key='manifest'").fetchone()
+    return jsonify({"available":True,**(json.loads(row[0]) if row else {"status":"building"})})
+
+
+@app.get("/api/comparison")
+def comparison_data():
+    if READER_VERSION != "v2":return jsonify({"error":"仅V2试点服务提供对比"}),404
+    path=Path(DB_PATH).resolve().parent/'comparison.json'
+    if not path.exists():return jsonify({"status":"preprocessing","cases":[]})
+    response=jsonify(json.loads(path.read_text()))
+    response.headers['Cache-Control']='no-store'
+    return response
+
+
+@app.get("/comparison")
+def comparison_page():
+    from flask import redirect
+    return redirect('http://127.0.0.1:5174/comparison.html')
 
 
 @app.get("/api/usage")
@@ -76,7 +123,15 @@ def get_chapters():
     conn = get_db_connection()
     chapters = conn.execute('SELECT chapter_index,title,volume,summary,key_events,status FROM chapters ORDER BY chapter_index ASC').fetchall()
     conn.close()
-    return jsonify([dict(ix) for ix in chapters])
+    result=[dict(ix) for ix in chapters]
+    if READER_VERSION=='v2':
+        indexed=compact_chapter_payloads(active_database())
+        for row in result:
+            item=indexed.get(row['chapter_index'])
+            row.update(summary=item['summary'] if item else '',
+                       key_events=json.dumps([e['action']+'；'+e['result'] for e in item['events']],ensure_ascii=False) if item else '[]',
+                       status='completed' if item else 'pending')
+    return jsonify(result)
 
 @app.get("/api/chapters/search")
 def search_chapters():
@@ -118,6 +173,11 @@ def update_summary(index):
 @app.route('/api/entities', methods=['GET'])
 def get_entities():
     chapter_index = request.args.get('chapter_index')
+    if READER_VERSION=='v2':
+        try:item=compact_chapter_payloads(active_database()).get(int(chapter_index or 0),{})
+        except ValueError:item={}
+        return jsonify([{'name':p['name'],'type':'person','description':p.get('role',''),
+                         'aliases':p.get('aliases',[]),'extracted':True} for p in item.get('characters',[])])
     conn = get_db_connection()
     
     if chapter_index:
@@ -185,6 +245,13 @@ def chat():
     message = payload.get("message")
     if not isinstance(message, str) or not message.strip():
         return jsonify({"response": "请输入问题。"}), 400
+    if READER_VERSION == 'v2':
+        path=index_path(active_database())
+        if not path.exists():return jsonify({'response':'V2预处理尚未完成，请查看试点进度。'}),503
+        with sqlite3.connect(path) as conn:
+            row=conn.execute("SELECT value FROM meta WHERE key='manifest'").fetchone()
+        if not row or json.loads(row[0]).get('status')!='published' or json.loads(row[0]).get('global_map_status')!='published':
+            return jsonify({'response':'V2正在通读预处理，发布后开放问答。'}),503
     if not MODEL_BASE and PROVIDER != "openai":
         return jsonify({"response": "尚未配置问答模型。"}), 503
     turns = payload.get("history")
@@ -231,4 +298,4 @@ def harness_workflows():
 # 如需分析新章节，请手动运行: python3 src/core/pipelines/sequential/sequential_engine.py
 
 if __name__ == '__main__':
-    app.run(port=5001)
+    app.run(host='127.0.0.1',port=int(os.getenv('LUMINA_API_PORT','5001')))

@@ -245,7 +245,10 @@ class Harness:
         cached = self.store.cached_tool(cache_key)
         cache_hit = cached is not None
         labels = {"catalog":"浏览章节目录","search":"检索相关线索","read":"阅读原文","scan":"逐章检索范围内原文",
-                  "extract":"核对并提取记录","aggregate":"合并与统计"}
+                  "extract":"核对并提取记录","aggregate":"合并与统计",
+                  "get_context":"查看剧情阶段与覆盖","search_knowledge":"检索事件和人物状态",
+                  "get_records":"展开跨章记录","get_evidence":"取回原文依据",
+                  "get_outcomes":"核对完整人物结局账本","typed_compute":"按身份去重并计算"}
         self.progress(phase=tool,step_label=labels.get(tool,"执行工具"),checked=len(self.state["steps"]),
                       total=len(self.state["steps"])+len(self.state["pending"]))
         if cached is None:

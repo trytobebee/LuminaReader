@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LuminaReader · V1 / V2 试点对比</title></head>
+<body><div id="comparison-app"><header><div class="eyebrow">LUMINA READER · 小石寨 104 章试点</div><h1>同一个问题，两套阅读方式</h1><p>保留 V1 历史答案，检验 V2 的事件索引、原文取证和调用开销。</p><nav><a href="http://127.0.0.1:5173/" target="_blank" rel="noopener">打开 V1</a><a href="/" target="_blank" rel="noopener">打开 V2</a></nav></header>
+<section class="totals" id="totals" aria-live="polite"></section>
+<p id="status" role="status">读取试点进度…</p>
+<section id="validation-notes"></section>
+<div class="workspace"><aside><h2>对比问题</h2><div id="case-list"></div><p class="aside-note">V1 来自已有记录，不重新生成。固定证据测试与历史聊天分别标注；缺失数据保持未知。</p></aside><main id="case-detail"><div class="placeholder">预处理完成后，逐题展示已有答案与 V2 新答案。</div></main></div>
+<footer>费用按回传用量估算，单位：美元。推理 token 已包含在输出 token 中；输入缓存分类不再重复加到总 token。预处理费用单独累计。问答用量包括规划、抽取和最终回答的全部模型调用；表内保留首次生成用量。V1固定证据测试的耗时不含召回，V2耗时包括工具执行与结果轮询。</footer></div><script type="module" src="/src/comparison.js"></script></body></html>
