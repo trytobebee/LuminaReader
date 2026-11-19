@@ -1,0 +1,33 @@
+LuminaReader V2 design verification — 2026-11-19
+Status: DESIGN PROPOSAL ONLY; no paid model calls or runtime migration.
+Runnable baseline: v1.0.0-reader-baseline / 4c3396de3dc3216c00ac17d4f57f41d8c8a550c7.
+Baseline validation: 69 offline unit tests, Vite build and whitespace checks passed before checkpoint push.
+
+Actual design verification:
+- 8 sections, 5 XML-parsed inline SVG figures, unique HTML/SVG IDs and local links.
+- Desktop 1600px and mobile 390px rendered in isolated Chromium; no horizontal page overflow.
+- Diagram text bounds, expandable prompt fragments and 48-case filtering checked.
+- No document network dependencies; stylesheet and figures embedded.
+- 12 proposed object schemas parsed; internal references, required fields and chapter-ID types checked.
+- No external JSON Schema conformance engine was installed or claimed.
+- 12 skill specifications and 48 NOT_RUN cases across 12 families; no V2 accuracy or saving measured.
+
+Separate reader-view semantic review and revisions:
+- Replaced vague time/layer wording with story time, revelation position and character knowledge.
+- Added canonical entity identity; unnamed roles bind to event/mention evidence, not generic labels.
+- Unified coverage chapter IDs as integers; preserved immutable source-span and index revisions.
+- Defined read-through progress rather than treating an opened chapter as fully known.
+- Kept counterfactuals out of factual Claim contracts and opinions out of canonical facts.
+- Stated embedding/preprocessing costs, unknown historical metrics and no automatic GPT reference reruns.
+- Marked thresholds as acceptance targets; cost targets cannot override evidence quality.
+- Collapsed long navigation on mobile after visual review.
+
+Collaboration boundary:
+- Existing concurrent edits to docs/reader-architecture.html were preserved and not included in this design commit.
+- Application source and private book data were not refactored by this proposal.
+
+Artifact SHA-256:
+compact-reader-v2.html: 2dd61af56bc71bffaca90fe3355d9d4476ea9e8a229f1f88c38ac72228071745
+compact-reader-v2-contracts.json: dc8e470ae45b8c539cbe2b52081c8850f2e943874d5bca075068c379c7169a80
+compact-reader-v2-policy.json: d20ec05346b6fb8d15570ae797496a2a4390814854b18d72fcae31f9ff50eaea
+compact-reader-v2-evaluation.json: 744a88de2959e12f42039f1db4a1076c12c33962d78e28e1914633b1089ec010

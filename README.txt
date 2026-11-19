@@ -55,3 +55,18 @@ It does not yet provide a verified cross-chapter event graph, narrative-phase
 boundaries, causal links, foreshadowing payoffs or character knowledge timelines.
 Valid citation IDs do not by themselves prove a claim is entailed by its source.
 The next design must preserve these distinctions and the cost controls.
+
+Compact-first V2 design (proposal, not deployed)
+-----------------------------------------------
+docs/compact-reader-v2.html               offline architecture proposal
+docs/compact-reader-v2-contracts.json     proposed evidence/data contracts
+docs/compact-reader-v2-policy.json        skills, reading-depth and cost policy
+docs/compact-reader-v2-evaluation.json    48 UNEXECUTED coverage cases
+docs/compact-reader-v2-validation.txt     actual document verification scope
+
+Rebuild the proposal without model calls:
+.venv/bin/python scripts/build_reader_design_specs.py
+.venv/bin/python scripts/build_compact_reader_design.py
+
+The runnable baseline is preserved as v1.0.0-reader-baseline. The design does
+not initiate paid preprocessing, migrate databases or replace the current chat.

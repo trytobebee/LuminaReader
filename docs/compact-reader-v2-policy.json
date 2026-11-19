@@ -1,0 +1,296 @@
+{
+  "status": "PROPOSED_NOT_ACTIVE",
+  "baseline_tag": "v1.0.0-reader-baseline",
+  "baseline_commit": "4c3396de3dc3216c00ac17d4f57f41d8c8a550c7",
+  "mode_policy": [
+    {
+      "mode": "compact",
+      "entry": "已发布索引的范围、身份、时间和证据包足够",
+      "actions": [
+        "search_knowledge",
+        "get_context",
+        "get_evidence",
+        "answer"
+      ],
+      "cost_rule": "Prefer local lookups; answer in the same planner turn when evidence is ready."
+    },
+    {
+      "mode": "focused_source",
+      "entry": "已定位事件/阶段，但关键事实缺引用、冲突或边界待核",
+      "actions": [
+        "read",
+        "extract_if_needed",
+        "compute_if_needed",
+        "answer"
+      ],
+      "cost_rule": "Read the smallest supporting spans plus relevant context, cache the evidence."
+    },
+    {
+      "mode": "deep",
+      "entry": "缺失事件链、完整统计覆盖不足、多轮证据冲突或原文定位连续失败",
+      "actions": [
+        "durable_read_job",
+        "read_scan_extract",
+        "propose_index_patch",
+        "answer"
+      ],
+      "cost_rule": "Never increase the authorized total budget automatically. Save progress on exhaustion."
+    }
+  ],
+  "evidence_gates": [
+    "scope_supported",
+    "identity_resolved",
+    "temporal_and_reveal_positions_valid",
+    "claim_source_support",
+    "required_range_coverage",
+    "counterevidence_checked",
+    "budget_available"
+  ],
+  "cross_record_checks": [
+    "source span end_char > start_char and exact substring/hash match",
+    "references stay inside the authorized book/source/index revisions",
+    "unit parentage is acyclic; event and character identity conflicts remain explicit",
+    "causal cycles are flagged for source review, not rejected just because a narrative includes time travel or a loop",
+    "counterfactual answers and reader opinions are not published as book facts"
+  ],
+  "base_tools_preserved": [
+    "catalog",
+    "search",
+    "read",
+    "scan",
+    "extract",
+    "aggregate",
+    "workflow"
+  ],
+  "proposed_additions": [
+    "search_knowledge",
+    "get_context",
+    "get_evidence",
+    "typed_compute"
+  ],
+  "skills": [
+    {
+      "id": "locate_scope",
+      "purpose": "定位剧情与章节",
+      "requires": [
+        "narrative_units",
+        "events"
+      ],
+      "evidence_rule": "核对进入、延续、结束与转场；返回多段范围与不确定边界",
+      "selection": "planner chooses composable skill; not a hardcoded question router",
+      "availability": "planned_core",
+      "completion_checks": [
+        "required evidence conditions met or gaps disclosed",
+        "authorized scope and budget respected"
+      ]
+    },
+    {
+      "id": "trace_relations",
+      "purpose": "关系与状态演进",
+      "requires": [
+        "events",
+        "entity_states"
+      ],
+      "evidence_rule": "按有效时间展示变化；两人或多人只是查询参数",
+      "selection": "planner chooses composable skill; not a hardcoded question router",
+      "availability": "planned_core",
+      "completion_checks": [
+        "required evidence conditions met or gaps disclosed",
+        "authorized scope and budget respected"
+      ]
+    },
+    {
+      "id": "trace_causes",
+      "purpose": "因果链",
+      "requires": [
+        "event_links",
+        "claims"
+      ],
+      "evidence_rule": "显式因果、角色说法、推断分层；先后不等于因果",
+      "selection": "planner chooses composable skill; not a hardcoded question router",
+      "availability": "planned_core",
+      "completion_checks": [
+        "required evidence conditions met or gaps disclosed",
+        "authorized scope and budget respected"
+      ]
+    },
+    {
+      "id": "trace_clues",
+      "purpose": "伏笔与悬念",
+      "requires": [
+        "clue_threads",
+        "claims"
+      ],
+      "evidence_rule": "种子、发展、回收、未回收和修正分别输出",
+      "selection": "planner chooses composable skill; not a hardcoded question router",
+      "availability": "planned_core",
+      "completion_checks": [
+        "required evidence conditions met or gaps disclosed",
+        "authorized scope and budget respected"
+      ]
+    },
+    {
+      "id": "track_knowledge",
+      "purpose": "人物认知与防剧透",
+      "requires": [
+        "entity_states",
+        "claims"
+      ],
+      "evidence_rule": "按揭露位置与读者进度过滤，不偷用未来信息",
+      "selection": "planner chooses composable skill; not a hardcoded question router",
+      "availability": "planned_core",
+      "completion_checks": [
+        "required evidence conditions met or gaps disclosed",
+        "authorized scope and budget respected"
+      ]
+    },
+    {
+      "id": "census",
+      "purpose": "全量身份/状态统计",
+      "requires": [
+        "events",
+        "entity_states",
+        "coverage"
+      ],
+      "evidence_rule": "名单、身份、最终状态和去重键均可追溯，覆盖不足不报严格总数",
+      "selection": "planner chooses composable skill; not a hardcoded question router",
+      "availability": "planned_core",
+      "completion_checks": [
+        "required evidence conditions met or gaps disclosed",
+        "authorized scope and budget respected"
+      ]
+    },
+    {
+      "id": "world_rules",
+      "purpose": "设定核对",
+      "requires": [
+        "claims",
+        "entity_states"
+      ],
+      "evidence_rule": "维护书内规则适用阶段与反例，不套用外书设定",
+      "selection": "planner chooses composable skill; not a hardcoded question router",
+      "availability": "planned_core",
+      "completion_checks": [
+        "required evidence conditions met or gaps disclosed",
+        "authorized scope and budget respected"
+      ]
+    },
+    {
+      "id": "discuss",
+      "purpose": "书友讨论",
+      "requires": [
+        "claims",
+        "events"
+      ],
+      "evidence_rule": "事实前提有出处，解读与评价明确标注，允许合理不同读法",
+      "selection": "planner chooses composable skill; not a hardcoded question router",
+      "availability": "planned_core",
+      "completion_checks": [
+        "required evidence conditions met or gaps disclosed",
+        "authorized scope and budget respected"
+      ]
+    },
+    {
+      "id": "calculate",
+      "purpose": "数值和时间计算",
+      "requires": [
+        "typed_records"
+      ],
+      "evidence_rule": "使用白名单算子；解释单位、分母、未知值，不执行生成代码",
+      "selection": "planner chooses composable skill; not a hardcoded question router",
+      "availability": "planned_core",
+      "completion_checks": [
+        "required evidence conditions met or gaps disclosed",
+        "authorized scope and budget respected"
+      ]
+    },
+    {
+      "id": "deep_read",
+      "purpose": "证据缺口深读",
+      "requires": [
+        "source_spans",
+        "coverage"
+      ],
+      "evidence_rule": "先验证缺口，再按事件依赖扩展，受已授权费用与来源范围约束",
+      "selection": "planner chooses composable skill; not a hardcoded question router",
+      "availability": "planned_core",
+      "completion_checks": [
+        "required evidence conditions met or gaps disclosed",
+        "authorized scope and budget respected"
+      ]
+    },
+    {
+      "id": "cross_book",
+      "purpose": "跨书比较",
+      "requires": [
+        "per_book_evidence_packages"
+      ],
+      "evidence_rule": "显式多文档选择、逐本出处和独立预算；后续阶段启用",
+      "selection": "planner chooses composable skill; not a hardcoded question router",
+      "availability": "later_opt_in",
+      "completion_checks": [
+        "required evidence conditions met or gaps disclosed",
+        "authorized scope and budget respected"
+      ]
+    },
+    {
+      "id": "external_sources",
+      "purpose": "外部资料核验",
+      "requires": [
+        "external_provenance"
+      ],
+      "evidence_rule": "仅启用相应连接器后使用；书内推断不能冒充作者访谈事实",
+      "selection": "planner chooses composable skill; not a hardcoded question router",
+      "availability": "later_opt_in",
+      "completion_checks": [
+        "required evidence conditions met or gaps disclosed",
+        "authorized scope and budget respected"
+      ]
+    }
+  ],
+  "skill_contract": {
+    "input": [
+      "question_goal",
+      "scope",
+      "reader_position",
+      "evidence_requirements",
+      "budget"
+    ],
+    "output": [
+      "evidence_package",
+      "coverage",
+      "unresolved",
+      "actual_usage"
+    ],
+    "allowed_writes": "query patches go to staging; discussion opinions never become book facts"
+  },
+  "typed_compute_operators": [
+    "filter",
+    "deduplicate",
+    "count",
+    "sum",
+    "mean",
+    "sort",
+    "interval_difference"
+  ],
+  "preprocessing_resource_defaults": {
+    "blas_threads": 4,
+    "dataloader_workers": 2,
+    "combined_cpu_thread_budget": 16,
+    "no_new_cpu_heavy_job_above_load1": 32,
+    "light_inspection_only_above_load1": 64,
+    "check_gpu_and_existing_jobs_before_launch": true
+  },
+  "cost_policy": {
+    "no_model_calls_during_design": true,
+    "reuse_existing_analyses_as_candidates": true,
+    "never_promote_old_summaries_to_source_truth": true,
+    "do_not_rerun_gpt_for_reference_answers": true,
+    "preprocess_and_qa_separate_budgets": true,
+    "count_retries_and_unknown_usage": true,
+    "embedding_usage_in_preprocess_budget": true,
+    "missing_historical_metrics_stay_unknown_without_auto_paid_rerun": true,
+    "cache_writes_reads_outputs_reported_separately": true,
+    "full_preprocessing_requires_token_estimate_and_explicit_total_budget": true
+  }
+}

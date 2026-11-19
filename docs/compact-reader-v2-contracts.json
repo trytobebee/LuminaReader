@@ -1,0 +1,1335 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:lumina:compact-reader:v2:proposal",
+  "title": "LuminaReader compact-first contracts — DESIGN PROPOSAL, not active runtime",
+  "description": "Source identity, proof-bearing compact records and coverage are versioned separately from dialogue and model choice.",
+  "$defs": {
+    "Entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "entity"
+        },
+        "id": {
+          "type": "string",
+          "description": ""
+        },
+        "book_id": {
+          "type": "string",
+          "description": ""
+        },
+        "source_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "index_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "entity_type": {
+          "type": "string",
+          "enum": [
+            "person",
+            "group",
+            "place",
+            "organization",
+            "object",
+            "other"
+          ]
+        },
+        "canonical_name": {
+          "type": "string",
+          "description": ""
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "mention_span_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "identity_claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "same_as_candidates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "identity_status": {
+          "type": "string",
+          "enum": [
+            "resolved",
+            "provisional",
+            "ambiguous"
+          ]
+        },
+        "temporary_identity_basis": {
+          "type": "string",
+          "description": "For unnamed people use an event/mention anchor, never a globally shared label such as unnamed master."
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "book_id",
+        "source_revision",
+        "index_revision",
+        "entity_type",
+        "canonical_name",
+        "aliases",
+        "mention_span_ids",
+        "identity_claim_ids",
+        "same_as_candidates",
+        "identity_status",
+        "temporary_identity_basis"
+      ]
+    },
+    "SourceSpan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "source_span"
+        },
+        "id": {
+          "type": "string",
+          "description": ""
+        },
+        "book_id": {
+          "type": "string",
+          "description": ""
+        },
+        "source_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "index_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "chapter_order": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "original_title": {
+          "type": "string",
+          "description": ""
+        },
+        "start_char": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end_char": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "text": {
+          "type": "string",
+          "description": "Exact substring of immutable decoded chapter text; [start_char,end_char) uses Unicode code points."
+        },
+        "text_sha256": {
+          "type": "string",
+          "description": ""
+        },
+        "legacy_paragraph_id": {
+          "type": "string",
+          "description": "Bridge to current cNpM or cNpMsK IDs."
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "book_id",
+        "source_revision",
+        "index_revision",
+        "chapter_order",
+        "original_title",
+        "start_char",
+        "end_char",
+        "text",
+        "text_sha256",
+        "legacy_paragraph_id"
+      ]
+    },
+    "Claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "claim"
+        },
+        "id": {
+          "type": "string",
+          "description": ""
+        },
+        "book_id": {
+          "type": "string",
+          "description": ""
+        },
+        "source_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "index_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "text": {
+          "type": "string",
+          "description": ""
+        },
+        "subject_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "object_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "claim_type": {
+          "type": "string",
+          "enum": [
+            "identity",
+            "action",
+            "state",
+            "rank",
+            "world_rule",
+            "knowledge",
+            "utterance",
+            "other"
+          ]
+        },
+        "epistemic": {
+          "type": "string",
+          "enum": [
+            "narrated",
+            "character_claim",
+            "recollection",
+            "inference"
+          ]
+        },
+        "asserted_by": {
+          "type": "string",
+          "description": ""
+        },
+        "revealed_at": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reveal_span_id": {
+          "type": "string",
+          "description": "Fine narrative position when multiple reveals occur in one chapter."
+        },
+        "story_time": {
+          "type": "string",
+          "description": "Known interval or explicitly unknown; do not invent dates."
+        },
+        "evidence_span_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": ""
+          },
+          "minItems": 1
+        },
+        "validation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "quote_integrity": {
+              "type": "boolean"
+            },
+            "semantic_status": {
+              "type": "string",
+              "enum": [
+                "unreviewed",
+                "source_supported",
+                "contested",
+                "unsupported"
+              ]
+            },
+            "review_method": {
+              "type": "string",
+              "enum": [
+                "none",
+                "rule",
+                "model",
+                "human"
+              ]
+            }
+          },
+          "required": [
+            "quote_integrity",
+            "semantic_status",
+            "review_method"
+          ]
+        },
+        "supersedes_claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "candidate",
+            "supported",
+            "disputed",
+            "superseded",
+            "rejected"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "book_id",
+        "source_revision",
+        "index_revision",
+        "text",
+        "subject_ids",
+        "object_ids",
+        "claim_type",
+        "epistemic",
+        "asserted_by",
+        "revealed_at",
+        "reveal_span_id",
+        "story_time",
+        "evidence_span_ids",
+        "validation",
+        "supersedes_claim_ids",
+        "status"
+      ]
+    },
+    "Event": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "event"
+        },
+        "id": {
+          "type": "string",
+          "description": ""
+        },
+        "book_id": {
+          "type": "string",
+          "description": ""
+        },
+        "source_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "index_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "action": {
+          "type": "string",
+          "description": ""
+        },
+        "goal": {
+          "type": "string",
+          "description": ""
+        },
+        "result": {
+          "type": "string",
+          "description": ""
+        },
+        "mention_span_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "narrative_first": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "narrative_last": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "story_time": {
+          "type": "string",
+          "description": ""
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ongoing",
+            "resolved",
+            "interrupted",
+            "unknown"
+          ]
+        },
+        "identity_status": {
+          "type": "string",
+          "enum": [
+            "candidate",
+            "linked",
+            "ambiguous"
+          ]
+        },
+        "identity_notes": {
+          "type": "string",
+          "description": ""
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "book_id",
+        "source_revision",
+        "index_revision",
+        "participants",
+        "action",
+        "goal",
+        "result",
+        "mention_span_ids",
+        "claim_ids",
+        "narrative_first",
+        "narrative_last",
+        "story_time",
+        "status",
+        "identity_status",
+        "identity_notes"
+      ]
+    },
+    "EventLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "event_link"
+        },
+        "id": {
+          "type": "string",
+          "description": ""
+        },
+        "book_id": {
+          "type": "string",
+          "description": ""
+        },
+        "source_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "index_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "from_event_id": {
+          "type": "string",
+          "description": ""
+        },
+        "to_event_id": {
+          "type": "string",
+          "description": ""
+        },
+        "relation": {
+          "type": "string",
+          "enum": [
+            "continues",
+            "precedes",
+            "explicit_cause",
+            "hypothesized_cause",
+            "enables",
+            "motivates",
+            "blocks",
+            "resolves",
+            "refers_back"
+          ]
+        },
+        "epistemic": {
+          "type": "string",
+          "enum": [
+            "source_explicit",
+            "character_claim",
+            "inferred"
+          ]
+        },
+        "evidence_span_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": ""
+          },
+          "minItems": 1
+        },
+        "validation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "quote_integrity": {
+              "type": "boolean"
+            },
+            "semantic_status": {
+              "type": "string",
+              "enum": [
+                "unreviewed",
+                "source_supported",
+                "contested",
+                "unsupported"
+              ]
+            },
+            "review_method": {
+              "type": "string",
+              "enum": [
+                "none",
+                "rule",
+                "model",
+                "human"
+              ]
+            }
+          },
+          "required": [
+            "quote_integrity",
+            "semantic_status",
+            "review_method"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "book_id",
+        "source_revision",
+        "index_revision",
+        "from_event_id",
+        "to_event_id",
+        "relation",
+        "epistemic",
+        "evidence_span_ids",
+        "validation"
+      ]
+    },
+    "NarrativeUnit": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "narrative_unit"
+        },
+        "id": {
+          "type": "string",
+          "description": ""
+        },
+        "book_id": {
+          "type": "string",
+          "description": ""
+        },
+        "source_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "index_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "unit_type": {
+          "type": "string",
+          "enum": [
+            "scene",
+            "phase",
+            "arc"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "description": ""
+        },
+        "parent_unit_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "event_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "phase_role": {
+          "type": "string",
+          "description": "Optional annotation: setup, trigger, turn, climax, aftermath, transition, or unknown; never force a plot into a fixed pattern."
+        },
+        "segments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "end": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "start",
+              "end"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "entry_claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "exit_claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "boundary_status": {
+          "type": "string",
+          "enum": [
+            "proposed",
+            "supported",
+            "ambiguous"
+          ]
+        },
+        "open_thread_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "excluded_mentions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Later recollections are mentions, not automatic arc members."
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "book_id",
+        "source_revision",
+        "index_revision",
+        "unit_type",
+        "label",
+        "parent_unit_ids",
+        "event_ids",
+        "phase_role",
+        "segments",
+        "entry_claim_ids",
+        "exit_claim_ids",
+        "boundary_status",
+        "open_thread_ids",
+        "excluded_mentions"
+      ]
+    },
+    "EntityState": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "entity_state"
+        },
+        "id": {
+          "type": "string",
+          "description": ""
+        },
+        "book_id": {
+          "type": "string",
+          "description": ""
+        },
+        "source_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "index_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "entity_id": {
+          "type": "string",
+          "description": ""
+        },
+        "property": {
+          "type": "string",
+          "description": "Book-defined property, e.g. physical_state, spirit_state, rank, allegiance, knowledge."
+        },
+        "old_value": {
+          "type": "string",
+          "description": ""
+        },
+        "new_value": {
+          "type": "string",
+          "description": ""
+        },
+        "valid_from_event": {
+          "type": "string",
+          "description": ""
+        },
+        "valid_to_event": {
+          "type": "string",
+          "description": ""
+        },
+        "revealed_at": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "uncertainty": {
+          "type": "string",
+          "description": ""
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "book_id",
+        "source_revision",
+        "index_revision",
+        "entity_id",
+        "property",
+        "old_value",
+        "new_value",
+        "valid_from_event",
+        "valid_to_event",
+        "revealed_at",
+        "claim_ids",
+        "uncertainty"
+      ]
+    },
+    "ClueThread": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "clue_thread"
+        },
+        "id": {
+          "type": "string",
+          "description": ""
+        },
+        "book_id": {
+          "type": "string",
+          "description": ""
+        },
+        "source_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "index_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "seed_claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "development_claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "payoff_claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "relation_basis": {
+          "type": "string",
+          "description": ""
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "candidate_setup",
+            "developing",
+            "resolved",
+            "open",
+            "disputed",
+            "revised"
+          ]
+        },
+        "validation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "quote_integrity": {
+              "type": "boolean"
+            },
+            "semantic_status": {
+              "type": "string",
+              "enum": [
+                "unreviewed",
+                "source_supported",
+                "contested",
+                "unsupported"
+              ]
+            },
+            "review_method": {
+              "type": "string",
+              "enum": [
+                "none",
+                "rule",
+                "model",
+                "human"
+              ]
+            }
+          },
+          "required": [
+            "quote_integrity",
+            "semantic_status",
+            "review_method"
+          ]
+        },
+        "spoiler_revealed_at": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "book_id",
+        "source_revision",
+        "index_revision",
+        "seed_claim_ids",
+        "development_claim_ids",
+        "payoff_claim_ids",
+        "relation_basis",
+        "status",
+        "validation",
+        "spoiler_revealed_at"
+      ]
+    },
+    "Coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "coverage"
+        },
+        "id": {
+          "type": "string",
+          "description": ""
+        },
+        "book_id": {
+          "type": "string",
+          "description": ""
+        },
+        "source_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "index_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "facet": {
+          "type": "string",
+          "enum": [
+            "events",
+            "boundaries",
+            "causes",
+            "clues",
+            "entity_states",
+            "world_rules",
+            "source_reading"
+          ]
+        },
+        "requested_chapter_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "uniqueItems": true
+        },
+        "processed_chapter_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "uniqueItems": true
+        },
+        "missing_chapter_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "uniqueItems": true
+        },
+        "reviewed_samples": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unresolved_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "full_source_pass",
+            "keyword_scan",
+            "compact_lookup",
+            "human_review"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "partial",
+            "processed",
+            "validated_sample",
+            "adjudicated_range"
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "description": "Processed coverage is not a proof of perfect semantic recall."
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "book_id",
+        "source_revision",
+        "index_revision",
+        "facet",
+        "requested_chapter_ids",
+        "processed_chapter_ids",
+        "missing_chapter_ids",
+        "reviewed_samples",
+        "unresolved_ids",
+        "method",
+        "status",
+        "notes"
+      ]
+    },
+    "Scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "scope"
+        },
+        "id": {
+          "type": "string",
+          "description": ""
+        },
+        "book_id": {
+          "type": "string",
+          "description": ""
+        },
+        "source_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "index_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "unit_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "event_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "chapter_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "context_chapter_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "excluded_event_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "boundary_claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "candidate",
+            "confirmed_for_question",
+            "ambiguous"
+          ]
+        },
+        "origin": {
+          "type": "string",
+          "enum": [
+            "user_selected",
+            "conversation",
+            "index_proposed",
+            "source_checked"
+          ]
+        },
+        "reader_position": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "Last chapter confirmed finished by the reader, not merely opened. Null means no read-through boundary."
+        },
+        "uncertainty": {
+          "type": "string",
+          "description": ""
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "book_id",
+        "source_revision",
+        "index_revision",
+        "unit_ids",
+        "event_ids",
+        "chapter_ids",
+        "context_chapter_ids",
+        "excluded_event_ids",
+        "boundary_claim_ids",
+        "status",
+        "origin",
+        "reader_position",
+        "uncertainty"
+      ]
+    },
+    "EvidencePackage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "evidence_package"
+        },
+        "id": {
+          "type": "string",
+          "description": ""
+        },
+        "book_id": {
+          "type": "string",
+          "description": ""
+        },
+        "source_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "index_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "scope_id": {
+          "type": "string",
+          "description": ""
+        },
+        "question_goal": {
+          "type": "string",
+          "description": ""
+        },
+        "claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "source_spans": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SourceSpan"
+          }
+        },
+        "coverage_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "counterevidence_claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "gate_results": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "fail",
+              "unknown"
+            ]
+          }
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "answer_mode": {
+          "type": "string",
+          "enum": [
+            "factual",
+            "interpretation",
+            "counterfactual",
+            "mixed"
+          ]
+        },
+        "requires_source_expansion": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "book_id",
+        "source_revision",
+        "index_revision",
+        "scope_id",
+        "question_goal",
+        "claim_ids",
+        "source_spans",
+        "coverage_ids",
+        "counterevidence_claim_ids",
+        "gate_results",
+        "unresolved",
+        "answer_mode",
+        "requires_source_expansion"
+      ]
+    },
+    "IndexManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "index_manifest"
+        },
+        "id": {
+          "type": "string",
+          "description": ""
+        },
+        "book_id": {
+          "type": "string",
+          "description": ""
+        },
+        "source_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "index_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "schema_version": {
+          "type": "string",
+          "description": ""
+        },
+        "extractor_versions": {
+          "type": "object"
+        },
+        "total_chapters": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "processed_chapters": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "facet_coverage_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "failed_job_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "open_quality_issues": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": ""
+        },
+        "publication": {
+          "type": "string",
+          "enum": [
+            "staging",
+            "published",
+            "superseded"
+          ]
+        },
+        "parent_index_revision": {
+          "type": "string",
+          "description": ""
+        },
+        "artifact_hashes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "book_id",
+        "source_revision",
+        "index_revision",
+        "schema_version",
+        "extractor_versions",
+        "total_chapters",
+        "processed_chapters",
+        "facet_coverage_ids",
+        "failed_job_ids",
+        "open_quality_issues",
+        "publication",
+        "parent_index_revision",
+        "artifact_hashes"
+      ]
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/Entity"
+    },
+    {
+      "$ref": "#/$defs/SourceSpan"
+    },
+    {
+      "$ref": "#/$defs/Claim"
+    },
+    {
+      "$ref": "#/$defs/Event"
+    },
+    {
+      "$ref": "#/$defs/EventLink"
+    },
+    {
+      "$ref": "#/$defs/NarrativeUnit"
+    },
+    {
+      "$ref": "#/$defs/EntityState"
+    },
+    {
+      "$ref": "#/$defs/ClueThread"
+    },
+    {
+      "$ref": "#/$defs/Coverage"
+    },
+    {
+      "$ref": "#/$defs/Scope"
+    },
+    {
+      "$ref": "#/$defs/EvidencePackage"
+    },
+    {
+      "$ref": "#/$defs/IndexManifest"
+    }
+  ]
+}

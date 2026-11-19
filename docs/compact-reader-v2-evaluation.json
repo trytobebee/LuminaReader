@@ -1,0 +1,939 @@
+{
+  "status": "DESIGN_ONLY_NOT_EXECUTED",
+  "cases": [
+    {
+      "id": "locate-01",
+      "family": "locate",
+      "family_label": "局部事实与定位",
+      "question": "这章秦宇采取了什么行动？请给原文出处。",
+      "criteria": "事实和引用主体对应；首次出现与首次行动区分。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "locate-02",
+      "family": "locate",
+      "family_label": "局部事实与定位",
+      "question": "这句话是谁对谁说的？前后语境是什么？",
+      "criteria": "事实和引用主体对应；首次出现与首次行动区分。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "locate-03",
+      "family": "locate",
+      "family_label": "局部事实与定位",
+      "question": "找出人物首次实际登场，而不是首次被提及的章节。",
+      "criteria": "事实和引用主体对应；首次出现与首次行动区分。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "locate-04",
+      "family": "locate",
+      "family_label": "局部事实与定位",
+      "question": "某件物品在本章被如何使用？区分计划和实际行动。",
+      "criteria": "事实和引用主体对应；首次出现与首次行动区分。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "scope-01",
+      "family": "scope",
+      "family_label": "剧情阶段与范围",
+      "question": "回顾秦宇初到小石寨村至离开去京城的完整情节。",
+      "criteria": "按事件延续及起止证据定位；不按地名首末命中机械截断。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "scope-02",
+      "family": "scope",
+      "family_label": "剧情阶段与范围",
+      "question": "中间几章不提小石寨村，但是否仍属于同一事件？",
+      "criteria": "按事件延续及起止证据定位；不按地名首末命中机械截断。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "scope-03",
+      "family": "scope",
+      "family_label": "剧情阶段与范围",
+      "question": "最后一次出现地名之后，善后与离开在哪些章节完成？",
+      "criteria": "按事件延续及起止证据定位；不按地名首末命中机械截断。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "scope-04",
+      "family": "scope",
+      "family_label": "剧情阶段与范围",
+      "question": "后文再次回忆小石寨村，是否应该扩展本段剧情范围？",
+      "criteria": "按事件延续及起止证据定位；不按地名首末命中机械截断。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "relations-01",
+      "family": "relations",
+      "family_label": "多人物关系变化",
+      "question": "欧阳明和秦宇的关系经历了哪些变化？请按章节梳理。",
+      "criteria": "人物归属、变化时点、相互评价和参与身份准确。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "existing_candidate_requires_original_adjudication",
+      "split": "regression_development",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "relations-02",
+      "family": "relations",
+      "family_label": "多人物关系变化",
+      "question": "比较三名人物在同一冲突中的目标与立场。",
+      "criteria": "人物归属、变化时点、相互评价和参与身份准确。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "relations-03",
+      "family": "relations",
+      "family_label": "多人物关系变化",
+      "question": "一次合作是否说明两人已经和解？列出支持和反例。",
+      "criteria": "人物归属、变化时点、相互评价和参与身份准确。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "relations-04",
+      "family": "relations",
+      "family_label": "多人物关系变化",
+      "question": "把同一人物的别名和无名身份对应起来，不确定的分开列。",
+      "criteria": "人物归属、变化时点、相互评价和参与身份准确。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "causes-01",
+      "family": "causes",
+      "family_label": "因果与行动条件",
+      "question": "这场冲突是怎样一步步升级的？区分导火索和背景条件。",
+      "criteria": "时间先后不当作因果；显式因果、角色说法和推断分层。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "causes-02",
+      "family": "causes",
+      "family_label": "因果与行动条件",
+      "question": "两个事件先后发生，原文是否明确说明因果关系？",
+      "criteria": "时间先后不当作因果；显式因果、角色说法和推断分层。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "causes-03",
+      "family": "causes",
+      "family_label": "因果与行动条件",
+      "question": "这次选择是角色自述的动机，还是叙述确认的原因？",
+      "criteria": "时间先后不当作因果；显式因果、角色说法和推断分层。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "causes-04",
+      "family": "causes",
+      "family_label": "因果与行动条件",
+      "question": "如果没有前一事件，后一事件是否仍可能发生？区分事实和反事实推演。",
+      "criteria": "时间先后不当作因果；显式因果、角色说法和推断分层。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "clues-01",
+      "family": "clues",
+      "family_label": "伏笔与回收",
+      "question": "登仙之梯相关线索怎样铺垫并揭露真相？",
+      "criteria": "种子与回收分别有证据；候选伏笔不当成作者意图事实。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "clues-02",
+      "family": "clues",
+      "family_label": "伏笔与回收",
+      "question": "列出某个悬念的出现、发展、回应章节；没回应的保持开放。",
+      "criteria": "种子与回收分别有证据；候选伏笔不当成作者意图事实。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "clues-03",
+      "family": "clues",
+      "family_label": "伏笔与回收",
+      "question": "哪些是后来印证的伏笔，哪些只是重复出现的意象？",
+      "criteria": "种子与回收分别有证据；候选伏笔不当成作者意图事实。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "clues-04",
+      "family": "clues",
+      "family_label": "伏笔与回收",
+      "question": "一个早期说法后来被推翻，如何保留它当时造成的影响？",
+      "criteria": "种子与回收分别有证据；候选伏笔不当成作者意图事实。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "knowledge-01",
+      "family": "knowledge",
+      "family_label": "叙述顺序与人物认知",
+      "question": "秦宇当时是否已经知道欧阳明的真实计划？",
+      "criteria": "事件发生、叙述揭露、角色知情三个时间位置分开。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "knowledge-02",
+      "family": "knowledge",
+      "family_label": "叙述顺序与人物认知",
+      "question": "读者知道的信息与人物知道的信息有哪些差异？",
+      "criteria": "事件发生、叙述揭露、角色知情三个时间位置分开。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "knowledge-03",
+      "family": "knowledge",
+      "family_label": "叙述顺序与人物认知",
+      "question": "这段死亡描述是当下发生，还是历史回忆？",
+      "criteria": "事件发生、叙述揭露、角色知情三个时间位置分开。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "knowledge-04",
+      "family": "knowledge",
+      "family_label": "叙述顺序与人物认知",
+      "question": "只讨论到指定章节，后面的真相不要剧透。",
+      "criteria": "事件发生、叙述揭露、角色知情三个时间位置分开。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "census-01",
+      "family": "census",
+      "family_label": "身份、境界与伤亡",
+      "question": "神女击败的五位世家宗师都死了吗？",
+      "criteria": "断臂/生死不知/元神被收与消亡分开；身份及最终状态接齐；名单与计数一致。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "existing_candidate_requires_original_adjudication",
+      "split": "regression_development",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "census-02",
+      "family": "census",
+      "family_label": "身份、境界与伤亡",
+      "question": "祠堂事件包含自尽守护者时，共多少位宗师死亡？",
+      "criteria": "断臂/生死不知/元神被收与消亡分开；身份及最终状态接齐；名单与计数一致。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "existing_candidate_requires_original_adjudication",
+      "split": "regression_development",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "census-03",
+      "family": "census",
+      "family_label": "身份、境界与伤亡",
+      "question": "秦宇战胜聂明升，是否说明他的境界最高？",
+      "criteria": "断臂/生死不知/元神被收与消亡分开；身份及最终状态接齐；名单与计数一致。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "existing_candidate_requires_original_adjudication",
+      "split": "regression_development",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "census-04",
+      "family": "census",
+      "family_label": "身份、境界与伤亡",
+      "question": "原稿顺序1738至1841，包含祁婆婆和传奇宗师，同一人去重后有多少位宗师死亡？",
+      "criteria": "断臂/生死不知/元神被收与消亡分开；身份及最终状态接齐；名单与计数一致。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "existing_candidate_requires_original_adjudication",
+      "split": "regression_development",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "world-01",
+      "family": "world",
+      "family_label": "设定与状态演进",
+      "question": "某个境界的限制有哪些？哪些来自人物说法？",
+      "criteria": "书内规则及有效时间明确；不引入其他小说设定。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "world-02",
+      "family": "world",
+      "family_label": "设定与状态演进",
+      "question": "同一个人物在不同阶段的境界变化是什么？",
+      "criteria": "书内规则及有效时间明确；不引入其他小说设定。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "world-03",
+      "family": "world",
+      "family_label": "设定与状态演进",
+      "question": "临时战力与实际境界分别有什么证据？",
+      "criteria": "书内规则及有效时间明确；不引入其他小说设定。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "world-04",
+      "family": "world",
+      "family_label": "设定与状态演进",
+      "question": "同一设定前后不一致，是新揭露、说法冲突还是无法判断？",
+      "criteria": "书内规则及有效时间明确；不引入其他小说设定。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "discussion-01",
+      "family": "discussion",
+      "family_label": "书友讨论与解释",
+      "question": "你如何理解秦宇与欧阳明的关系变化？给出另一种读法。",
+      "criteria": "事实前提有出处；解释允许多解；反事实不写回事实索引。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "discussion-02",
+      "family": "discussion",
+      "family_label": "书友讨论与解释",
+      "question": "这段情节的叙事节奏有什么作用？引用具体段落。",
+      "criteria": "事实前提有出处；解释允许多解；反事实不写回事实索引。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "discussion-03",
+      "family": "discussion",
+      "family_label": "书友讨论与解释",
+      "question": "你是否赞同这个人物的选择？区分评价和书内事实。",
+      "criteria": "事实前提有出处；解释允许多解；反事实不写回事实索引。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "discussion-04",
+      "family": "discussion",
+      "family_label": "书友讨论与解释",
+      "question": "假设人物作出另一种选择，可能发生什么？清楚标注推演。",
+      "criteria": "事实前提有出处；解释允许多解；反事实不写回事实索引。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "calculation-01",
+      "family": "calculation",
+      "family_label": "确定性计算",
+      "question": "在一个明确范围内，按阵营统计已确认死亡者，并列身份依据。",
+      "criteria": "类型、单位、分母、去重键和未知值策略可复算。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "calculation-02",
+      "family": "calculation",
+      "family_label": "确定性计算",
+      "question": "根据明确给出的时间计算耗时，缺失时间不补造。",
+      "criteria": "类型、单位、分母、去重键和未知值策略可复算。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "calculation-03",
+      "family": "calculation",
+      "family_label": "确定性计算",
+      "question": "计算有明确记录的阶段平均耗时，并说明分母和排除项。",
+      "criteria": "类型、单位、分母、去重键和未知值策略可复算。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "calculation-04",
+      "family": "calculation",
+      "family_label": "确定性计算",
+      "question": "把明确境界按书内层级排序，不把未知阶段强行编码。",
+      "criteria": "类型、单位、分母、去重键和未知值策略可复算。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "coverage-01",
+      "family": "coverage",
+      "family_label": "资料不足与能力边界",
+      "question": "现有索引没有这段情节，能否只读相关原文补齐？",
+      "criteria": "缺口触发正确技能或说明未支持；不得假装已读、已检索。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "coverage-02",
+      "family": "coverage",
+      "family_label": "资料不足与能力边界",
+      "question": "比较两本已加载的书，逐本标明来源。",
+      "criteria": "缺口触发正确技能或说明未支持；不得假装已读、已检索。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "coverage-03",
+      "family": "coverage",
+      "family_label": "资料不足与能力边界",
+      "question": "查作者访谈来证实创作意图；若未启用外部检索应明确说明。",
+      "criteria": "缺口触发正确技能或说明未支持；不得假装已读、已检索。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "coverage-04",
+      "family": "coverage",
+      "family_label": "资料不足与能力边界",
+      "question": "载入含图片的PDF，询问插图信息；未支持时不可假装读到。",
+      "criteria": "缺口触发正确技能或说明未支持；不得假装已读、已检索。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "operations-01",
+      "family": "operations",
+      "family_label": "上下文、缓存与预算",
+      "question": "相同问题再次提问，复用合格答案和证据，不重复花费。",
+      "criteria": "缓存、讨论隔离、增量失效和预算停止可检查。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "operations-02",
+      "family": "operations",
+      "family_label": "上下文、缓存与预算",
+      "question": "切换到另一个讨论后问其中有几人，不能沿用错误范围。",
+      "criteria": "缓存、讨论隔离、增量失效和预算停止可检查。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "operations-03",
+      "family": "operations",
+      "family_label": "上下文、缓存与预算",
+      "question": "修改某一章后，只失效依赖它的证据与答案。",
+      "criteria": "缓存、讨论隔离、增量失效和预算停止可检查。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    },
+    {
+      "id": "operations-04",
+      "family": "operations",
+      "family_label": "上下文、缓存与预算",
+      "question": "原文阅读即将超过预算时，给出已知结论、缺口和继续阅读的费用上限。",
+      "criteria": "缓存、讨论隔离、增量失效和预算停止可检查。",
+      "execution_status": "NOT_RUN",
+      "gold_status": "not_labeled",
+      "split": "candidate_holdout_after_labeling",
+      "reference_policy": "Reuse prior GPT/Qwen outputs as candidate references only; do not regenerate GPT automatically.",
+      "required_annotations": [
+        "source_revision",
+        "scope",
+        "required_claims",
+        "acceptable_interpretations",
+        "source_spans",
+        "coverage_requirements"
+      ]
+    }
+  ],
+  "metrics": [
+    "claim_support_precision",
+    "scope_precision_and_recall",
+    "final_state_accuracy",
+    "event_identity_accuracy",
+    "causal_edge_correctness",
+    "foreshadowing_link_correctness",
+    "spoiler_violations",
+    "unresolved_disclosure",
+    "compact_focused_deep_distribution",
+    "cost_and_tokens_per_answer",
+    "cache_reuse_savings"
+  ],
+  "initial_acceptance_targets_not_measurements": {
+    "adjudicated_claim_support_precision": 0.98,
+    "scope_recall": 0.95,
+    "scope_precision": 0.85,
+    "critical_factual_errors_on_regressions": 0,
+    "compact_or_focused_share_on_labeled_question_mix": 0.8,
+    "unapproved_budget_expansions": 0
+  },
+  "measurement_policy": "Report by family, not only overall. Initially label cases against source. Mocked tool tests validate mechanics, not model accuracy. Track budgets and partial answers; do not optimize cost by hiding failures."
+}
