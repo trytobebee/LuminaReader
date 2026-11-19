@@ -1,0 +1,31 @@
+LuminaReader baseline checkpoint
+================================
+Tag: v1.0.0-reader-baseline
+Date: 2026-11-19 (Asia/Shanghai)
+
+Purpose: preserve the working system before compact-first preprocessing and
+question-answering architecture redesign.
+
+Included capabilities
+----------------------
+- Chat-first UI, document library, recent discussions and reference reading.
+- Chapter people and plot search, Markdown answers and tables.
+- Unified bounded plan/act/observe harness, source citations and coverage checks.
+- Local tool/answer caches, learned workflow candidates and negative feedback.
+- Checkpoints, transport retry accounting and per-question usage/cost limits.
+- Sidebar cumulative spending and token animations based on returned usage.
+- Historical Reader usage import, deduplication and incomplete-record notices.
+- Legacy pipelines and the fixed-evidence model comparison script retained.
+
+Verification at this checkpoint
+---------------------------------
+69 offline unit tests passed; Vite production build passed; whitespace checks
+passed. Earlier isolated browser checks covered desktop/mobile layout, real-data
+counter display and mocked settlement/cache/reload/disconnect/reduced-motion
+flows. No paid inference was run to validate this checkpoint.
+
+Scope of backup
+-----------------
+Code, dependency metadata, tests and the current architecture reference are
+versioned. .env, private book data, databases, runtime accounting, caches,
+browser storage, local model weights and dist/ are not uploaded to GitHub.

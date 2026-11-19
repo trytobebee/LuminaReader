@@ -3,8 +3,9 @@ import os
 
 db_path = '/Users/bytedance/code/LuminaReader/data/knowledge_base.db'
 
-def init_db():
-    conn = sqlite3.connect(db_path)
+def init_db(path=None):
+    target_path = path or db_path
+    conn = sqlite3.connect(target_path)
     cursor = conn.cursor()
     
     # 章节表
@@ -75,7 +76,7 @@ def init_db():
     
     conn.commit()
     conn.close()
-    print(f"Knowledge base initialized at {db_path}")
+    print(f"Knowledge base initialized at {target_path}")
 
 if __name__ == "__main__":
     init_db()

@@ -1,135 +1,148 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LuminaReader - Deep Text Deconstructor</title>
+    <meta name="theme-color" content="#f6f5f1">
+    <title>Lumina · 与一本书对话</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/src/style.css">
 </head>
-
-<body class="theme-dark">
-    <div id="app">
-        <nav class="navbar">
-            <div class="logo">
-                <span class="logo-text">LuminaReader</span>
+<body>
+    <div id="app" class="app-shell">
+        <aside class="space-sidebar" aria-label="阅读空间">
+            <a class="brand" href="/" aria-label="Lumina 首页"><span class="brand-mark">l</span><span>Lumina<span class="brand-dot">.</span></span></a>
+            <button id="new-conversation" class="new-conversation"><span>＋</span> 新的讨论 <span class="shortcut">↗</span></button>
+            <div class="sidebar-label">正在阅读</div>
+            <button id="choose-document" class="current-document">
+                <span class="mini-cover">书</span>
+                <span class="document-label"><strong id="sidebar-book-title">正在载入…</strong><small id="sidebar-book-status">连接阅读空间</small></span>
+                <span class="document-chevron">⌄</span>
+            </button>
+            <nav class="space-nav" aria-label="工作区">
+                <button class="nav-item active" id="discussion-home" aria-current="page" title="返回当前讨论"><span>◌</span> 书本对话</button>
+                <button class="nav-item" id="open-reference"><span>☷</span> 参考阅读 <span class="nav-trailing">↗</span></button>
+            </nav>
+            <div class="sidebar-section-heading"><span class="sidebar-label">最近讨论</span></div>
+            <div id="conversation-list" class="conversation-list"></div>
+            <div class="sidebar-bottom">
+                <section id="spend-meter" class="spend-meter" data-state="loading" aria-label="阅读问答累计用量">
+                    <div class="spend-heading"><span>累计预估费用</span><button class="spend-info" type="button" popovertarget="spend-details" aria-label="查看计量详情" title="查看累计用量与费用说明">i</button></div>
+                    <div class="spend-money"><span class="spend-currency">$</span><span id="spend-cost">—</span><span class="spend-unit">USD</span></div>
+                    <div id="spend-cost-short" class="spend-cost-short" aria-hidden="true">—</div>
+                    <div class="spend-token-line"><span><strong id="spend-tokens">—</strong> <span class="spend-token-label">Token</span></span><span class="spend-orbit" aria-hidden="true"><i></i><i></i><i></i></span></div>
+                    <div id="spend-tokens-short" class="spend-tokens-short" aria-hidden="true">—</div>
+                    <svg class="spend-chart" viewBox="0 0 180 26" aria-hidden="true"><polyline id="spend-sparkline" points="0,23 180,23" /></svg>
+                    <div class="spend-status"><span class="spend-status-dot" aria-hidden="true"></span><span id="spend-status" role="status">正在读取累计用量</span></div>
+                    <span id="spend-delta" class="spend-delta" aria-hidden="true"></span>
+                </section>
+                <button id="load-document" class="load-document"><span>＋</span> 载入文档</button>
+                <div class="workspace-caption"><span class="online-dot"></span> 你的私人阅读空间</div>
             </div>
-            <div class="nav-controls">
-                <div id="processing-status" class="status-indicator">
-                    <span class="status-label">Standby</span>
-                </div>
-                <button id="toggle-chat" class="btn-icon">💬</button>
-                <button id="settings-btn" class="btn-icon">⚙️</button>
-            </div>
-        </nav>
+        </aside>
 
-        <main class="main-container">
-            <!-- Sidebar: Chapter List & Status -->
-            <aside class="sidebar">
-                <div class="sidebar-header">
-                    <h3>Manuscript</h3>
-                    <span id="total-chapters" class="badge">0</span>
-                </div>
-                <ul id="chapter-list" class="chapter-list">
-                    <!-- Chapters populated via JS -->
-                </ul>
-            </aside>
+        <div id="spend-details" class="spend-details" popover>
+            <div class="spend-details-heading"><span>阅读用量账本</span><button type="button" popovertarget="spend-details" popovertargetaction="hide" aria-label="关闭计量详情">×</button></div>
+            <strong id="spend-detail-cost" class="spend-detail-cost">—</strong>
+            <p class="spend-detail-caption">所有文档的已记录问答 · 持久保存</p>
+            <dl class="spend-breakdown">
+                <div><dt>输入 Token</dt><dd id="spend-detail-input_tokens">—</dd></div>
+                <div><dt>输出 Token</dt><dd id="spend-detail-output_tokens">—</dd></div>
+                <div><dt>其中推理 Token</dt><dd id="spend-detail-reasoning_tokens">—</dd></div>
+                <div><dt>API 请求</dt><dd id="spend-detail-api_requests">—</dd></div>
+                <div><dt>缓存读取 Token</dt><dd id="spend-detail-cached_input_tokens">—</dd></div>
+                <div><dt>缓存写入 Token</dt><dd id="spend-detail-cache_write_input_tokens">—</dd></div>
+            </dl>
+            <p id="spend-detail-warning" class="spend-detail-warning" hidden></p>
+            <ul id="spend-recent" class="spend-recent" aria-label="最近入账"></ul>
+            <p class="spend-detail-note">费用按已返回的 API 用量及单价折算，以服务商账单为准。正在生成时显示活动动画，用量回传后数字结算；本地答案缓存不新增费用。推理已包含在输出 Token 中。</p>
+            <p class="spend-detail-note">已补入可追溯的历史问答。更早未保存用量的调用、通读预处理及独立模型测试不含在内，未计价用量不会按零费用冒充完整账单。</p>
+        </div>
 
-            <!-- Main Workspace: Text & Analysis -->
-            <section class="workspace">
-                <div class="pane-content">
-                    <div id="reader-title" class="reader-title">Select a chapter to begin</div>
-                    <div id="reader-body" class="reader-body">
-                        <!-- Chapter text goes here -->
-                    </div>
-                </div>
-
-                <div class="pane-analysis">
-                    <div class="analysis-header">
-                        <h3>Analysis Workshop</h3>
-                        <div id="analysis-status"></div>
-                    </div>
-                    <div class="analysis-scroll">
-                        <div class="analysis-card">
-                            <h4>Chapter Summary</h4>
-                            <textarea id="chapter-summary" class="summary-edit"
-                                placeholder="AI summary will appear here..."></textarea>
-                        </div>
-
-                        <div class="analysis-card">
-                            <h4>Entities Discovered</h4>
-                            <div id="entity-list" class="entity-list">
-                                <!-- Entity tags go here -->
-                            </div>
-                            <button id="add-entity" class="btn-add-small">+ Add Entity</button>
-                        </div>
-
-                        <div class="analysis-card">
-                            <h4>Key Plot Points (one per line)</h4>
-                            <textarea id="plot-points-edit" class="summary-edit"
-                                placeholder="Edit key events here, one per line..."></textarea>
-                        </div>
-
-                        <div class="action-bar">
-                            <button id="save-analysis" class="btn-primary">Verify & Sync Knowledge</button>
+        <main class="conversation-workspace">
+            <header class="workspace-header">
+                <div class="breadcrumb"><span class="header-label">阅读空间</span><span class="breadcrumb-slash">/</span><button id="header-document" class="header-document">正在载入</button></div>
+                <div class="header-actions"><span id="processing-status" class="processing-status"><span class="status-dot"></span><span class="status-label">正在连接</span></span><button id="reference-toggle" class="reference-toggle">参考阅读 <span>↗</span></button></div>
+            </header>
+            <section id="chat-widget" class="chat-container" aria-label="书本对话">
+                <div id="chat-messages" class="chat-messages">
+                    <div class="chat-empty">
+                        <div class="welcome-eyebrow"><span class="welcome-line"></span> 与一本书对话</div>
+                        <h1>好的故事，<br>值得<span>再聊一聊。</span></h1>
+                        <p class="welcome-description">从一个人物、一段情节，聊到故事背后的更多可能。</p>
+                        <div class="welcome-book"><span class="book-spine"></span><span id="welcome-book-title">超品相师</span><span class="welcome-book-divider">·</span><span id="welcome-book-meta">正在载入文档</span></div>
+                        <div id="suggestions" class="suggestion-grid">
+                            <button class="suggestion" data-prompt="欧阳明和秦宇的关系经历了哪些变化？请按章节梳理。"><span class="suggestion-label">人物与关系 <span>↗</span></span><strong>两个宿敌，如何走向合作？</strong><p>回顾欧阳明与秦宇的关系变化</p></button>
+                            <button class="suggestion" data-prompt="请回顾小石寨村的完整情节，从秦宇初到村庄到大战后离开去京城，按章节整理关键转折。"><span class="suggestion-label">情节回顾 <span>↗</span></span><strong>把一段故事，重新串起来。</strong><p>梳理小石寨村的关键转折</p></button>
+                            <button class="suggestion" data-prompt="小石寨村这段剧情中，有多少位宗师或传奇宗师殒命？请检索原文，逐人核对。"><span class="suggestion-label">寻找依据 <span>↗</span></span><strong>记忆中的细节，原文怎么说？</strong><p>核对小石寨村的宗师伤亡</p></button>
+                            <button class="suggestion" data-prompt="结合原文，你如何理解秦宇与欧阳明从敌对到合作的转变？请区分原文事实和你的解读。"><span class="suggestion-label">一起聊书 <span>↗</span></span><strong>同一段故事，也有不同读法。</strong><p>聊聊人物的选择与动机</p></button>
                         </div>
                     </div>
+                </div>
+                <div class="composer-wrap">
+                    <div class="chat-input">
+                        <textarea id="chat-msg-input" rows="2" disabled aria-label="输入问题" placeholder="关于这本书，你想聊些什么？"></textarea>
+                        <div class="composer-toolbar"><span class="composer-source"><span class="online-dot"></span><span id="composer-book-title">超品相师</span></span><button id="send-chat" type="button" disabled aria-label="发送问题">↑</button></div>
+                    </div>
+                    <div class="composer-caption"><span>结合章节与原文，陪你读得更深入</span><span><span id="chat-model"></span><span class="keyboard-hint">Enter 发送</span></span></div>
                 </div>
             </section>
         </main>
 
-        <!-- Chat Bot Interface -->
-        <div id="chat-widget" class="chat-container hidden">
-            <div class="chat-header">
-                <h4>Lumina Expert</h4>
-                <button id="close-chat" class="btn-close">×</button>
+        <aside id="reference-panel" class="reference-panel" aria-label="参考阅读" hidden>
+            <header class="reference-header"><div><span class="eyebrow">随读随查</span><h2>参考阅读</h2></div><button id="close-reference" class="icon-button" aria-label="关闭参考阅读">×</button></header>
+            <div class="reference-tabs" role="tablist" aria-label="阅读内容">
+                <button role="tab" id="tab-chapters" data-tab="chapters" aria-selected="true">章节 <span id="total-chapters">0</span></button>
+                <button role="tab" id="tab-original" data-tab="original" aria-selected="false">原文</button>
+                <button role="tab" id="tab-analysis" data-tab="analysis" aria-selected="false">解读</button>
             </div>
-            <div id="chat-messages" class="chat-messages">
-                <div class="msg bot">Hello! I am analysis the text. Ask me anything about the story so far.</div>
-            </div>
-            <div class="chat-input">
-                <input type="text" id="chat-msg-input" placeholder="Ask about the plot, characters...">
-                <button id="send-chat" class="btn-icon">🚀</button>
-            </div>
-        </div>
-        <!-- Entity Modal -->
-        <div id="entity-modal" class="modal-overlay hidden">
-            <div class="modal-card">
-                <div class="modal-header">
-                    <h4>Add New Knowledge Entity</h4>
-                    <button class="btn-close" id="close-entity-modal">×</button>
-                </div>
-                <div class="modal-body">
-                    <div class="input-group">
-                        <label>Entity Name</label>
-                        <input type="text" id="new-ent-name" placeholder="e.g. 秦宇">
-                    </div>
-                    <div class="input-group">
-                        <label>Entity Type</label>
-                        <select id="new-ent-type">
-                            <option value="person">Person (角色)</option>
-                            <option value="location">Location (地点)</option>
-                            <option value="item">Item (物品/功法)</option>
-                            <option value="organization">Organization (组织)</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Description</label>
-                        <textarea id="new-ent-desc" placeholder="Brief background story..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button id="submit-entity" class="btn-primary">Append to Knowledge Base</button>
-                </div>
-            </div>
-        </div>
+            <section id="reference-chapters" class="reference-content" role="tabpanel" aria-labelledby="tab-chapters">
+                <form id="chapter-search" class="chapter-search" role="search" aria-label="搜索章节">
+                    <select id="chapter-search-mode" aria-label="搜索范围"><option value="people">人物</option><option value="plot">情节 / 摘要</option></select>
+                    <input id="chapter-search-query" type="search" aria-label="关键词" placeholder="姓名或别称" maxlength="100">
+                    <button type="submit" aria-label="搜索章节">⌕</button>
+                    <button id="clear-chapter-search" type="button" hidden>清除</button>
+                </form>
+                <p id="chapter-search-status" class="chapter-search-status" role="status" hidden></p>
+                <ul id="chapter-list" class="chapter-list"></ul>
+            </section>
+            <section id="reference-original" class="reference-content reference-original" role="tabpanel" aria-labelledby="tab-original" hidden>
+                <div id="reader-title" class="reader-title">选择一个章节</div>
+                <div id="reader-body" class="reader-body"><p class="reference-empty">从章节列表或回答中的出处打开原文。</p></div>
+            </section>
+            <section id="reference-analysis" class="reference-content analysis-scroll" role="tabpanel" aria-labelledby="tab-analysis" hidden>
+                <div class="analysis-heading"><h3 id="analysis-chapter-title">章节解读</h3><div id="analysis-status"></div></div>
+                <div class="analysis-card"><h4>章节概要</h4><textarea id="chapter-summary" class="summary-edit" aria-label="章节概要" placeholder="选择一个章节查看"></textarea></div>
+                <div class="analysis-card"><h4>本章人物</h4><div id="entity-list" class="entity-list"></div><button id="add-entity" class="subtle-button">＋ 补充人物</button></div>
+                <div class="analysis-card"><h4>关键事件</h4><textarea id="plot-points-edit" class="summary-edit" aria-label="关键事件" placeholder="关键事件，一行一条"></textarea></div>
+                <button id="save-analysis" class="secondary-button">保存解读</button>
+            </section>
+            <div class="reference-footer"><button id="ask-chapter" class="secondary-button" disabled>聊聊这一章 ↗</button></div>
+        </aside>
+    </div>
 
-        <script type="module" src="/src/main.js"></script>
+    <dialog id="document-dialog" class="document-dialog">
+        <div class="dialog-heading"><div><span class="eyebrow">阅读资料</span><h2>载入一本书，开始一段对话。</h2></div><button id="close-documents" class="icon-button" aria-label="关闭文档窗口">×</button></div>
+        <div id="document-list" class="document-list"></div>
+        <form id="document-upload" class="upload-card">
+            <label for="document-file"><span class="upload-symbol">＋</span><strong>载入新的文档</strong><span>TXT 或 Markdown · 最大 64 MB</span></label>
+            <input id="document-file" name="file" type="file" accept=".txt,.md,text/plain,text/markdown" required>
+            <p>载入后自动识别章节、建立原文索引，即可开始提问。分析按需进行，回答中显示用量。</p>
+            <button id="import-document" class="primary-button" type="submit">载入并建立索引</button>
+            <div id="document-upload-status" role="status"></div>
+        </form>
+    </dialog>
+
+    <dialog id="entity-modal" class="entity-modal">
+        <div class="dialog-heading"><h2>补充人物</h2><button id="close-entity-modal" class="icon-button" aria-label="关闭人物窗口">×</button></div>
+        <label>姓名<input type="text" id="new-ent-name" placeholder="人物姓名"></label>
+        <label>类型<select id="new-ent-type"><option value="person">人物</option><option value="location">地点</option><option value="item">物品 / 功法</option><option value="organization">组织</option></select></label>
+        <label>描述<textarea id="new-ent-desc" rows="3" placeholder="人物背景或相关经历"></textarea></label>
+        <button id="submit-entity" class="primary-button">保存</button>
+    </dialog>
+    <div id="toast" class="toast" role="status" hidden></div>
+    <script type="module" src="/src/main.js"></script>
 </body>
-
 </html>

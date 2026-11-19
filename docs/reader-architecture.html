@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LuminaReader · 代码架构与问答 Harness</title><meta name="description" content="LuminaReader 当前代码架构：统一动态执行循环、工具调用、流程积累与复用、缓存、费用和证据边界。"><style>/* design-doc skill CSS template — inline this verbatim into <style> block */
+/* Source: distilled from XDC v5 / SEMI-style hand-coded HTML docs */
+
+:root {
+  --bg: #f5f7fa; --card: #ffffff;
+  --ink: #1f2937; --ink-soft: #374151;
+  --muted: #6b7280; --border: #e5e7eb;
+  --p1: #2563eb; --p1-bg: #eff6ff; --p1-border: #bfdbfe;
+  --p2: #7c3aed; --p2-bg: #f5f3ff; --p2-border: #ddd6fe;
+  --p3: #0891b2; --p3-bg: #ecfeff; --p3-border: #a5f3fc;
+  --base: #0891b2;
+  --warn: #ea580c; --warn-bg: #fff7ed; --warn-border: #fed7aa;
+  --danger: #dc2626; --danger-bg: #fef2f2;
+  --ok: #16a34a; --ok-bg: #f0fdf4;
+  --code-bg: #0f172a; --code-ink: #e2e8f0;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg); color: var(--ink);
+  line-height: 1.7; font-size: 15px;
+}
+.layout {
+  display: grid; grid-template-columns: 280px 1fr;
+  max-width: 1380px; margin: 0 auto; gap: 28px;
+  padding: 32px 24px 80px;
+}
+aside.toc {
+  position: sticky; top: 24px; align-self: start;
+  max-height: calc(100vh - 48px); overflow-y: auto;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px 18px; font-size: 13px;
+}
+aside.toc h3 {
+  margin: 0 0 12px; font-size: 12px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;
+}
+aside.toc ul { list-style: none; padding: 0; margin: 0; }
+aside.toc li { margin: 4px 0; }
+aside.toc a {
+  color: var(--ink-soft); text-decoration: none;
+  display: block; padding: 5px 10px;
+  border-radius: 6px; border-left: 3px solid transparent;
+  transition: all 0.15s;
+}
+aside.toc a:hover {
+  background: var(--p1-bg); color: var(--p1); border-left-color: var(--p1);
+}
+aside.toc .toc-sub a { font-size: 12px; padding-left: 22px; color: var(--muted); }
+aside.toc .toc-h2 { margin-top: 10px; font-weight: 600; color: var(--ink); }
+main { min-width: 0; }
+
+/* Hero banner */
+header.hero {
+  background: linear-gradient(135deg, #0e7490 0%, #1d4ed8 50%, #6d28d9 100%);
+  color: #fff; padding: 38px 40px; border-radius: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 12px 28px rgba(13, 71, 161, 0.18);
+}
+header.hero h1 { margin: 0 0 8px; font-size: 26px; font-weight: 700; }
+header.hero .sub { opacity: 0.92; font-size: 14.5px; line-height: 1.65; }
+header.hero .badges { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+header.hero .badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.22);
+  border: 1px solid rgba(255,255,255,0.35);
+  padding: 4px 12px; border-radius: 6px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.3px;
+}
+header.hero .meta {
+  margin-top: 16px; display: flex; flex-wrap: wrap;
+  gap: 18px; font-size: 13px; opacity: 0.9;
+}
+header.hero .meta span::before { content: "●"; margin-right: 6px; opacity: 0.55; }
+
+/* Section cards */
+section.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 28px 32px; margin-bottom: 22px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+.sec-head {
+  display: flex; align-items: center; gap: 14px;
+  padding-bottom: 16px; margin-bottom: 8px;
+  border-bottom: 2px solid var(--border);
+}
+.sec-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 10px;
+  color: #fff; font-weight: 700; font-size: 16px; flex-shrink: 0;
+}
+.sec-head h2 { margin: 0; font-size: 22px; }
+.sec-tag {
+  display: inline-block; padding: 3px 10px; border-radius: 6px;
+  font-size: 12px; font-weight: 500; margin-left: 8px; vertical-align: middle;
+}
+.overview  .sec-badge { background: var(--base); }
+.overview  .sec-tag   { background: var(--p3-bg); color: var(--p3); }
+.resources .sec-badge { background: var(--p2); }
+.resources .sec-tag   { background: var(--p2-bg); color: var(--p2); }
+.core      .sec-badge { background: var(--p1); }
+.core      .sec-tag   { background: var(--p1-bg); color: var(--p1); }
+.method    .sec-badge { background: #b45309; }
+.method    .sec-tag   { background: #fef3c7; color: #b45309; }
+.synergy   .sec-badge { background: #475569; }
+.synergy   .sec-tag   { background: #f1f5f9; color: #475569; }
+.future    .sec-badge { background: var(--warn); }
+.future    .sec-tag   { background: var(--warn-bg); color: var(--warn); }
+.roadmap   .sec-badge { background: var(--ok); }
+.roadmap   .sec-tag   { background: var(--ok-bg); color: var(--ok); }
+.deliver   .sec-badge { background: var(--base); }
+
+/* sub-headers with color-coded left border */
+h3.sec-h3 {
+  margin: 26px 0 14px; padding-left: 12px;
+  font-size: 17px; font-weight: 600;
+  border-left: 4px solid #cbd5e1;
+}
+.overview  h3.sec-h3 { color: var(--p3); border-left-color: var(--p3); }
+.resources h3.sec-h3 { color: var(--p2); border-left-color: var(--p2); }
+.core      h3.sec-h3 { color: var(--p1); border-left-color: var(--p1); }
+.method    h3.sec-h3 { color: #b45309; border-left-color: #b45309; }
+.synergy   h3.sec-h3 { color: #475569; border-left-color: #475569; }
+.future    h3.sec-h3 { color: var(--warn); border-left-color: var(--warn); }
+.roadmap   h3.sec-h3 { color: var(--ok); border-left-color: var(--ok); }
+.deliver   h3.sec-h3 { color: var(--base); border-left-color: var(--base); }
+
+h4.sec-h4 {
+  margin: 22px 0 10px; font-size: 14.5px; font-weight: 600;
+  color: var(--ink-soft);
+}
+
+/* Sub-link card (each of 3 sublinks in core) */
+.sublink-card {
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 20px 24px; margin: 16px 0;
+  background: #fcfcfd;
+}
+.sublink-card .sublink-head {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+}
+.sublink-card .sublink-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 7px;
+  color: #fff; font-weight: 700; font-size: 13px; flex-shrink: 0;
+}
+.sublink-card .sublink-head h4 {
+  margin: 0; font-size: 16px; font-weight: 700;
+}
+.sublink-card[data-color="blue"]    { border-color: var(--p1-border); }
+.sublink-card[data-color="blue"]    .sublink-badge { background: var(--p1); }
+.sublink-card[data-color="cyan"]    { border-color: #a5f3fc; }
+.sublink-card[data-color="cyan"]    .sublink-badge { background: var(--p3); }
+.sublink-card[data-color="emerald"] { border-color: #a7f3d0; }
+.sublink-card[data-color="emerald"] .sublink-badge { background: var(--ok); }
+.sublink-card[data-color="rust"]    { border-color: #fed7aa; }
+.sublink-card[data-color="rust"]    .sublink-badge { background: #c2410c; }
+.sublink-card[data-color="violet"]  { border-color: #ddd6fe; }
+.sublink-card[data-color="violet"]  .sublink-badge { background: var(--p2); }
+
+/* Principle cards (within method section) */
+.principle {
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px 24px; margin: 16px 0;
+  background: linear-gradient(180deg, #fffbf3 0%, #ffffff 100%);
+  border-left: 4px solid #b45309;
+}
+.principle .p-head {
+  display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.principle .p-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 7px;
+  background: #b45309; color: #fff; font-weight: 700; font-size: 14px;
+  flex-shrink: 0;
+}
+.principle h4 { margin: 0; font-size: 16px; font-weight: 700; }
+.principle .p-tag {
+  font-size: 12px; color: #b45309; background: #fef3c7;
+  padding: 2px 8px; border-radius: 4px; font-weight: 600;
+}
+.principle .p-body {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
+  margin-top: 12px;
+}
+.principle .p-cell h5 {
+  margin: 0 0 6px; font-size: 12px; color: #b45309;
+  text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700;
+}
+.principle .p-cell p, .principle .p-cell {
+  font-size: 13.5px; line-height: 1.65; color: var(--ink-soft);
+}
+.principle .p-cite {
+  margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border);
+  font-size: 12px; color: var(--muted); font-style: italic;
+}
+.principle .p-cite strong { color: #b45309; font-style: normal; }
+@media (max-width: 980px) {
+  .principle .p-body { grid-template-columns: 1fr; }
+}
+
+/* Figure container */
+.fig {
+  background: #fafbfc; border: 1px solid var(--border);
+  border-radius: 10px; padding: 20px; margin: 14px 0;
+  text-align: center; overflow-x: auto;
+}
+.fig svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+.fig-caption {
+  font-size: 12.5px; color: var(--muted);
+  text-align: center; margin-top: 8px; font-style: italic;
+}
+
+/* Tables */
+table {
+  width: 100%; border-collapse: collapse; margin: 14px 0;
+  font-size: 13.5px; background: #fff; border-radius: 8px;
+  overflow: hidden; border: 1px solid var(--border);
+}
+th {
+  background: #f8fafc; text-align: left; padding: 10px 14px;
+  font-weight: 600; color: var(--ink-soft);
+  border-bottom: 1px solid var(--border); font-size: 12.5px;
+}
+td {
+  padding: 10px 14px; border-bottom: 1px solid #f1f5f9; vertical-align: top;
+}
+tr:last-child td { border-bottom: none; }
+td code, th code, p code, li code {
+  background: #f1f5f9; padding: 1px 6px; border-radius: 4px;
+  font-size: 12.5px; color: #be185d;
+  font-family: "SF Mono", Menlo, monospace;
+}
+
+/* Note callouts */
+.note {
+  background: #f0f9ff; border-left: 4px solid #38bdf8;
+  border-radius: 6px; padding: 12px 16px; margin: 14px 0;
+  font-size: 13.5px; color: #075985;
+}
+.note strong { color: #0c4a6e; }
+.note.warn-note   { background: var(--warn-bg);   border-left-color: var(--warn);   color: #9a3412; }
+.note.warn-note strong { color: #7c2d12; }
+.note.danger-note { background: var(--danger-bg); border-left-color: var(--danger); color: #991b1b; }
+.note.danger-note strong { color: #7f1d1d; }
+.note.ok-note     { background: var(--ok-bg);     border-left-color: var(--ok);     color: #14532d; }
+.note.ok-note strong { color: #14532d; }
+
+/* Interactive checklist */
+ul.checklist { list-style: none; padding: 0; margin: 14px 0; }
+ul.checklist li {
+  padding: 9px 14px; margin-bottom: 5px;
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 6px; display: flex; gap: 10px;
+  cursor: pointer; font-size: 13.5px;
+  transition: border-color 0.15s;
+}
+ul.checklist li:hover { border-color: var(--p1); }
+ul.checklist input[type=checkbox] {
+  margin-top: 3px; width: 16px; height: 16px;
+  accent-color: var(--p1); cursor: pointer; flex-shrink: 0;
+}
+ul.checklist label { cursor: pointer; flex: 1; }
+
+/* Pills row (used in 一期边界 do/dont) */
+.pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 14px; }
+.pill {
+  display: inline-block; padding: 5px 12px; border-radius: 16px;
+  font-size: 12.5px; font-weight: 500;
+  border: 1px solid var(--border); background: #fff;
+}
+.pill.do    { color: var(--ok);     border-color: #a7f3d0; background: #f0fdf4; }
+.pill.dont  { color: var(--danger); border-color: #fecaca; background: #fef2f2; }
+
+/* Body lists */
+ul, ol { padding-left: 22px; }
+ul li, ol li { margin: 5px 0; }
+strong { color: var(--ink); font-weight: 600; }
+
+@media (max-width: 980px) {
+  .layout { grid-template-columns: 1fr; padding: 16px; }
+  aside.toc { position: static; max-height: none; margin-bottom: 16px; }
+  section.card { padding: 20px; }
+  header.hero { padding: 26px 24px; }
+}
+@media print {
+  body { background: #fff; font-size: 11.5px; line-height: 1.5; }
+  .layout { grid-template-columns: 1fr; padding: 8px; gap: 0; }
+  aside.toc { display: none; }
+  section.card { box-shadow: none; page-break-inside: avoid; padding: 14px; }
+  header.hero { background: #1e3a8a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .note, .pill { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+.layout {max-width:1480px;} .sec-tag{margin-left:0;margin-top:5px;}
+header.hero .eyebrow{font-size:11px;letter-spacing:.17em;text-transform:uppercase;opacity:.8;margin-bottom:10px;}
+header.hero strong{color:inherit;} .hero-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;}
+.hero-actions a,.hero-actions button{color:white;background:#ffffff15;border:1px solid #ffffff55;border-radius:7px;padding:7px 13px;font:inherit;font-size:12px;text-decoration:none;cursor:pointer;}
+.table-scroll{overflow:auto;margin:16px 0;max-width:100%;border-radius:9px;border:1px solid var(--border);}
+.table-scroll table{margin:0;min-width:650px;} td{vertical-align:top;overflow-wrap:anywhere;} td:first-child{font-weight:600;} th{white-space:nowrap;}
+.source-link{color:#2858a9;text-decoration:none;} .source-link:hover{text-decoration:underline;} .source-link code{font-size:11.5px;}
+pre{overflow:auto;font-size:12px;line-height:1.7;} pre code{background:transparent;color:inherit;padding:0;}
+.fig{overflow:auto;border:1px solid #e5e7eb;border-radius:10px;margin-top:20px;} .fig svg{display:block;min-width:850px;width:100%;height:auto;}
+.diagram-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:18px 0 4px;font-size:12px;color:var(--muted);flex-wrap:wrap;}
+.diagram-toolbar label{display:flex;align-items:center;gap:7px;cursor:pointer;} .diagram-toolbar input{accent-color:#4f46e5;}
+.model-highlight .model-node rect{stroke:#7c3aed;stroke-width:4;} .model-highlight .model-node text{fill:#5b21b6;}
+details{margin-top:18px;border:1px solid var(--border);border-radius:8px;padding:13px 15px;} summary{cursor:pointer;color:#475569;font-weight:600;font-size:13px;}
+.snapshot .table-scroll table{min-width:690px;} footer{color:var(--muted);font-size:12px;padding:14px 4px;line-height:1.9;}
+.toc-status{font-size:11px;padding:12px 10px;margin-top:15px;border-top:1px solid var(--border);color:var(--muted);} .toc-status strong{display:block;color:#0891b2;font-size:12px;margin-bottom:4px;}
+aside.toc a[aria-current=true]{background:var(--p1-bg);color:var(--p1);border-left-color:var(--p1);}
+@media(max-width:700px){.layout{padding:12px;gap:12px;}section.card{padding:20px 17px;}header.hero{padding:28px 22px;}header.hero h1{font-size:25px;line-height:1.4;}.sec-head h2{font-size:20px;}.sec-badge{width:34px;height:34px;}.sec-head{gap:10px;}.sec-tag{font-size:11px;padding:3px 0;background:transparent!important;}.table-scroll table{min-width:670px;}.hero .meta{gap:8px!important;}.toc-grid{display:grid;grid-template-columns:1fr 1fr;column-gap:8px;}aside.toc a{padding:6px 5px;}p,li{overflow-wrap:anywhere;}}
+@media print{.hero-actions,.diagram-toolbar,aside.toc{display:none!important;}.fig svg{min-width:0;}section.card{page-break-inside:auto;}pre{white-space:pre-wrap;}.table-scroll{overflow:visible;} .table-scroll table{min-width:0;} details{display:block;} .snapshot{font-size:10px;}}
+</style><style id="unified-reader-theme">
+/* Unified document palette — aligned with the Agent Loop figure. */
+:root{--bg:#f4f6f2;--ink:#243b31;--ink-soft:#3c5145;--muted:#728078;--border:#dce4dc;
+--p1:#3d6954;--p1-bg:#edf4ee;--p1-border:#cddbd2;--p2:#536b5e;--p2-bg:#f1f5f2;--p2-border:#d4ded7;
+--p3:#3d6954;--p3-bg:#edf4ee;--p3-border:#cddbd2;--base:#3d6954;
+--warn:#a57a40;--warn-bg:#fcf8f1;--warn-border:#ddcbb0;--ok:#3d6954;--ok-bg:#f0f5f1;
+--code-bg:#263c31;--code-ink:#edf3ee;}
+header.hero{background:linear-gradient(125deg,#284b3a 0%,#355f4b 56%,#507861 100%);box-shadow:0 12px 28px rgba(34,67,46,.13);}
+section.card{box-shadow:0 1px 3px rgba(34,67,46,.025);}
+section.card .sec-badge{background:#3d6954;}
+section.card .sec-tag{background:#edf3ee;color:#526a5a;}
+section.card h3.sec-h3{color:#3d6954;border-left-color:#8da795;}
+.sec-head{border-bottom-color:#dce5dd;}
+.note{background:#f0f5f1;border-left-color:#91a99a;color:#3c5948;}
+.note strong,.note.ok-note strong{color:#355f48;}
+.note.ok-note{background:#f0f5f1;border-left-color:#698e76;color:#355b43;}
+.note.warn-note{background:#fcf8f1;border-left-color:#b18b55;color:#80613a;}
+.note.warn-note strong{color:#76562e;}
+code,td code,th code,p code,li code,.source-link code{background:#edf3ee;color:#3d6650;}
+pre code{color:inherit;background:transparent;}
+th{background:#eff4ef;color:#3c5145;}
+.source-link{color:#3d6954;}
+.toc-status strong{color:#3d6954;}
+.fig{border-color:#dbe4dd;}
+.model-highlight .model-node rect{stroke:#54769c;stroke-width:4;}
+.model-highlight .model-node text{fill:#385c82;}
+#main-flow.model-highlight .model-node rect{stroke:#83bdff;stroke-width:4;}
+#main-flow.model-highlight .model-node text{fill:#ffffff;}
+summary{color:#526658;}
+.checklist input[type=checkbox],.diagram-toolbar input{accent-color:#3d6954;}
+@media print{header.hero{background:#355f4b!important;}}
+</style></head>
+<body><div class="layout"><aside class="toc" aria-label="文档目录"><h3>Reader / Engineering</h3><ul class="toc-grid"><li class="toc-h2"><a href="#s1">01 · 架构总览</a></li><li class="toc-h2"><a href="#s2">02 · 问答执行主循环</a></li><li class="toc-h2"><a href="#s3">03 · 工具与模型调用</a></li><li class="toc-h2"><a href="#s4">04 · 流程学习与复用</a></li><li class="toc-h2"><a href="#s5">05 · 状态与三层缓存</a></li><li class="toc-h2"><a href="#s6">06 · 预算与证据约束</a></li><li class="toc-h2"><a href="#s7">07 · 接口与修改入口</a></li><li class="toc-h2"><a href="#s8">08 · 验证与当前边界</a></li></ul><div class="toc-status"><strong>实现快照 · reader-tools-v1</strong>内部架构与交接文档<br>更新：2026-11-19<br>重点：问答 harness 工作流程</div></aside>
+<main><header class="hero"><div class="eyebrow">LuminaReader · Engineering Notes</div><h1>代码架构与问答 Harness</h1><div class="sub">统一动态执行，逐步积累可复用流程。<br>明确模型负责什么、程序执行什么，以及每次问答如何保留证据与用量。</div><div class="badges"><span class="badge">统一执行循环</span><span class="badge">动态＋流程复用</span><span class="badge">原文出处与预算</span></div><div class="meta"><span>代码版本 reader-tools-v1</span><span>受众 开发与设计协作</span><span>2026-11-19</span></div><div class="hero-actions"><a href="#s2">先看问答流程 ↓</a><button id="print" type="button">打印 / 保存 PDF</button></div></header>
+<section class="card overview" id="s1"><div class="sec-head"><div class="sec-badge">01</div><div><h2>架构总览</h2><span class="sec-tag">Architecture · 以代码现状为准</span></div></div><p><strong>LuminaReader 将阅读界面、文档数据与问答执行分开管理。当前问答入口使用统一执行循环：模型安排下一步，程序执行有明确输入输出的工具；已有答案、证据和流程可以复用。</strong></p><p>本文说明 <code>reader-tools-v1</code> 的实现快照，供开发与后续设计融合使用。Harness 在这里指包在模型外面的执行代码：它管理上下文、工具、状态、缓存、预算和停止条件。</p><div class="fig"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+  viewBox="0 0 1500 900" width="100%" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; max-width: 1500px;">
+<defs>
+  <filter id="architecture-card-shadow" x="-5%" y="-5%" width="110%" height="115%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+    <feOffset dx="0" dy="1" result="offsetblur"/>
+    <feComponentTransfer><feFuncA type="linear" slope="0.08"/></feComponentTransfer>
+    <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <marker id="architecture-arrow-slate" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 1 L 8 5 L 0 9 z" fill="#475569"/></marker>
+  <marker id="architecture-arrow-slate-thin" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M 0 2 L 7 5 L 0 8 z" fill="#cbd5e1"/></marker>
+  <marker id="architecture-arrow-indigo" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 1 L 8 5 L 0 9 z" fill="#4f46e5"/></marker>
+  <marker id="architecture-arrow-amber" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 1 L 8 5 L 0 9 z" fill="#d97706"/></marker>
+  <marker id="architecture-arrow-emerald" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 1 L 8 5 L 0 9 z" fill="#059669"/></marker>
+</defs>
+<rect width="100%" height="100%" fill="white"/>
+<text x="750" y="49" font-size="30" fill="#183b31" font-weight="700" text-anchor="middle" dominant-baseline="central" letter-spacing="normal">Reader 的代码分层</text>
+<text x="750" y="86" font-size="20" fill="#4b675c" font-weight="400" text-anchor="middle" dominant-baseline="central" letter-spacing="normal">界面、任务执行、原文工具与模型适配各自负责明确的事情</text>
+<defs><marker id="architecture-u-control" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L8 5L1 9Z" fill="#09845c"/></marker><marker id="architecture-u-model" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L8 5L1 9Z" fill="#2563eb"/></marker><marker id="architecture-u-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L8 5L1 9Z" fill="#8ba397"/></marker><marker id="architecture-u-stop" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L8 5L1 9Z" fill="#d18417"/></marker></defs><rect x="60" y="125" width="1380" height="112" rx="12" ry="12" fill="#ffffff" stroke="#c6ddcf" stroke-width="1.25"/>
+<text x="84" y="160" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">交互界面</text>
+<text x="1416" y="160" font-size="18" fill="#4b675c" font-weight="500" text-anchor="end" dominant-baseline="central" letter-spacing="normal">src/main.js</text>
+<text x="84" y="203" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">讨论与阅读切换 · Markdown 与表格 · 原文出处 · 处理过程与用量</text>
+<rect x="60" y="285" width="440" height="137" rx="12" ry="12" fill="#ffffff" stroke="#c6ddcf" stroke-width="1.25"/>
+<text x="84" y="320" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">HTTP 入口</text>
+<text x="84" y="363" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">src/api/app.py</text>
+<text x="84" y="392" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">统一进入 /api/chat</text>
+<rect x="550" y="285" width="890" height="137" rx="12" ry="12" fill="#ffffff" stroke="#c6ddcf" stroke-width="1.25"/>
+<text x="574" y="320" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">任务运行层</text>
+<text x="1416" y="320" font-size="18" fill="#4b675c" font-weight="500" text-anchor="end" dominant-baseline="central" letter-spacing="normal">chat_runtime.py</text>
+<text x="574" y="363" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">文档隔离 · 答案缓存 · 后台排队 · 检查点与反馈</text>
+<rect x="60" y="465" width="820" height="137" rx="12" ry="12" fill="#09845c" stroke="#09845c" stroke-width="1.8"/>
+<text x="84" y="500" font-size="24" fill="#ffffff" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">统一问答执行器</text>
+<text x="856" y="500" font-size="18" fill="#e2f8ec" font-weight="500" text-anchor="end" dominant-baseline="central" letter-spacing="normal">reader_harness.py</text>
+<text x="84" y="543" font-size="21" fill="#e2f8ec" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">目标与范围 · 动态决策 · 工具执行 · 引用校验</text>
+<rect x="940" y="465" width="500" height="137" rx="12" ry="12" fill="#ffffff" stroke="#c6ddcf" stroke-width="1.25"/>
+<text x="964" y="500" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">原文工具</text>
+<text x="1416" y="500" font-size="18" fill="#4b675c" font-weight="500" text-anchor="end" dominant-baseline="central" letter-spacing="normal">reader_tools.py</text>
+<text x="964" y="543" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">检索 · 读取 · 扫描 · 抽取 · 统计</text>
+<text x="964" y="572" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">extract 按需调用模型</text>
+<rect x="60" y="660" width="820" height="137" rx="12" ry="12" fill="#ffffff" stroke="#c6ddcf" stroke-width="1.25"/>
+<text x="84" y="695" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">存储与复用</text>
+<text x="84" y="738" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">文档 SQLite · 任务 JSON · workflows.sqlite3</text>
+<g class="model-node"><rect x="940" y="660" width="500" height="137" rx="12" ry="12" fill="#edf5ff" stroke="#83b4fb" stroke-width="1.8"/>
+<rect x="941" y="677" width="4" height="103" rx="2" fill="#2563eb"/><text x="964" y="695" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">模型与用量适配</text>
+<text x="964" y="738" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">model_client.py / usage.py</text>
+<text x="964" y="767" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">模型请求、Token 与费用预算</text>
+</g><line x1="280" y1="237" x2="280" y2="285" stroke="#8ba397" stroke-width="1.6" stroke-linecap="round" marker-end="url(#architecture-u-neutral)"/>
+<line x1="500" y1="345" x2="550" y2="345" stroke="#8ba397" stroke-width="1.6" stroke-linecap="round" marker-end="url(#architecture-u-neutral)"/>
+<line x1="760" y1="422" x2="760" y2="465" stroke="#09845c" stroke-width="2.5" stroke-linecap="round" marker-end="url(#architecture-u-control)"/>
+<line x1="880" y1="515" x2="940" y2="515" stroke="#09845c" stroke-width="2.5" stroke-linecap="round" marker-end="url(#architecture-u-control)"/>
+<line x1="940" y1="560" x2="880" y2="560" stroke="#8ba397" stroke-width="1.6" stroke-linecap="round" marker-end="url(#architecture-u-neutral)"/>
+<line x1="430" y1="602" x2="430" y2="660" stroke="#8ba397" stroke-width="1.6" stroke-linecap="round" marker-end="url(#architecture-u-neutral)"/>
+<line x1="820" y1="602" x2="1040" y2="660" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" marker-end="url(#architecture-u-model)"/>
+<text x="60" y="843" font-size="19" fill="#09845c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">绿色：执行与控制</text>
+<text x="580" y="843" font-size="19" fill="#2563eb" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">蓝色：模型调用相关</text>
+<text x="1060" y="843" font-size="19" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">灰色：共享状态与存储</text>
+</svg>
+
+
+
+
+</div><div class="fig-caption">图 1 · 代码分层。模型决策通过执行器调用适配层；原文工具中的 extract 也会调用模型。</div><div class="table-scroll" tabindex="0"><table><thead><tr><th>层次</th><th>代码入口</th><th>职责</th></tr></thead><tbody><tr><td>界面</td><td><a class="source-link" href="../src/main.js"><code>src/main.js</code></a> / <a class="source-link" href="../src/style.css"><code>src/style.css</code></a></td><td>讨论与参考阅读、原文引用、Markdown 表格、执行过程和费用展示。</td></tr><tr><td>服务接口</td><td><a class="source-link" href="../src/api/app.py"><code>src/api/app.py</code></a> / <a class="source-link" href="../src/api/documents.py"><code>documents.py</code></a></td><td>校验请求、选择文档数据库、提交任务、查询进度、接收反馈。</td></tr><tr><td>任务运行</td><td><a class="source-link" href="../src/core/pipelines/novel/chat_runtime.py"><code>chat_runtime.py</code></a></td><td>按文档隔离任务，检查答案缓存，后台排队执行和恢复。</td></tr><tr><td>执行核心</td><td><a class="source-link" href="../src/core/pipelines/novel/reader_harness.py"><code>reader_harness.py</code></a></td><td>维护目标、证据和计划，执行动作、检查引用与覆盖情况。</td></tr><tr><td>工具与复用</td><td><a class="source-link" href="../src/core/pipelines/novel/reader_tools.py"><code>reader_tools.py</code></a> / <a class="source-link" href="../src/core/pipelines/novel/reader_workflows.py"><code>reader_workflows.py</code></a></td><td>读取原文、抽取和统计；积累、选择及执行可复用步骤。</td></tr><tr><td>模型与用量</td><td><a class="source-link" href="../src/core/pipelines/novel/model_client.py"><code>model_client.py</code></a> / <a class="source-link" href="../src/core/pipelines/novel/usage.py"><code>usage.py</code></a></td><td>适配模型服务，记录实际返回的 Token，用请求上限与费用预留约束执行。</td></tr></tbody></table></div><div class="note "><strong>原有数据继续使用：</strong>章节原文、约 150 字摘要、核心情节和人物索引仍在文档 SQLite 中。摘要负责定位线索，最终事实应回到原文确认。</div></section><section class="card core" id="s2"><div class="sec-head"><div class="sec-badge">02</div><div><h2>问答 harness：一次请求的完整过程</h2><span class="sec-tag">Execution loop · 本文重点</span></div></div><p>当前入口没有“恰好两个名字就分析关系”的路由，也不要求先把问题归入固定类别。所有问题由 <code>POST /api/chat</code> 进入同一任务运行层。</p><div class="diagram-toolbar"><label><input type="checkbox" id="highlight-model"> 标出图中的模型决策节点</label><span>图可横向滚动</span></div><div class="fig" id="main-flow"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+  viewBox="0 0 1500 1080" width="100%" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; max-width: 1500px;">
+<defs>
+  <filter id="request-card-shadow" x="-5%" y="-5%" width="110%" height="115%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+    <feOffset dx="0" dy="1" result="offsetblur"/>
+    <feComponentTransfer><feFuncA type="linear" slope="0.08"/></feComponentTransfer>
+    <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <marker id="request-arrow-slate" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 1 L 8 5 L 0 9 z" fill="#475569"/></marker>
+  <marker id="request-arrow-slate-thin" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M 0 2 L 7 5 L 0 8 z" fill="#cbd5e1"/></marker>
+  <marker id="request-arrow-indigo" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 1 L 8 5 L 0 9 z" fill="#4f46e5"/></marker>
+  <marker id="request-arrow-amber" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 1 L 8 5 L 0 9 z" fill="#d97706"/></marker>
+  <marker id="request-arrow-emerald" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 1 L 8 5 L 0 9 z" fill="#059669"/></marker>
+</defs>
+<rect width="100%" height="100%" fill="white"/>
+<text x="750" y="49" font-size="30" fill="#183b31" font-weight="700" text-anchor="middle" dominant-baseline="central" letter-spacing="normal">问答执行：入口旁路、核心循环与退出</text>
+<text x="750" y="86" font-size="20" fill="#4b675c" font-weight="400" text-anchor="middle" dominant-baseline="central" letter-spacing="normal">围绕同一个 Agent Loop，按证据决定下一步</text>
+<defs>
+      <marker id="request-flow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L8 5L1 9Z" fill="#09845c"/></marker>
+      <marker id="request-flow-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L8 5L1 9Z" fill="#8ba397"/></marker>
+      <marker id="request-flow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L8 5L1 9Z" fill="#d18417"/></marker>
+    </defs><text x="50" y="152" font-size="20" fill="#4b675c" font-weight="600" text-anchor="start" dominant-baseline="central" letter-spacing="normal">01  入口与旁路</text>
+<text x="1130" y="152" font-size="20" fill="#4b675c" font-weight="600" text-anchor="start" dominant-baseline="central" letter-spacing="normal">03  返回与退出</text>
+<rect x="390" y="155" width="700" height="805" rx="18" ry="18" fill="#f0fbf4" stroke="#77bd97" stroke-width="1.5"/>
+<text x="425" y="194" font-size="23" fill="#09845c" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">02  AGENT LOOP</text>
+<text x="425" y="226" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">决策 → 执行 → 观察 → 再决策</text>
+<rect x="50" y="185" width="300" height="95" rx="12" ry="12" fill="#ffffff" stroke="#c6ddcf" stroke-width="1.25"/>
+<text x="74" y="220" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">问题与上下文</text>
+<text x="74" y="261" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">文档 · 历史 · 当前范围</text>
+<rect x="50" y="325" width="300" height="120" rx="12" ry="12" fill="#ffffff" stroke="#c6ddcf" stroke-width="1.25"/>
+<text x="74" y="360" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">前置检查</text>
+<text x="74" y="401" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">校验输入和模型配置</text>
+<text x="74" y="431" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">检查缓存与已有任务</text>
+<rect x="50" y="490" width="300" height="140" rx="12" ry="12" fill="#ffffff" stroke="#c6ddcf" stroke-width="1.25"/>
+<text x="74" y="525" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">已启用流程</text>
+<text x="74" y="566" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">唯一匹配 → 复用步骤</text>
+<text x="74" y="596" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">否则 → 动态决策</text>
+<rect x="1130" y="185" width="320" height="160" rx="12" ry="12" fill="#ffffff" stroke="#c6ddcf" stroke-width="1.25"/>
+<text x="1154" y="220" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">直接返回</text>
+<text x="1154" y="261" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">缓存命中 → 已有答案</text>
+<text x="1154" y="291" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">已有任务 → 返回任务 ID</text>
+<text x="1154" y="321" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">请求无效 → 错误说明</text>
+<g class="model-node"><rect x="440" y="260" width="600" height="130" rx="12" ry="12" fill="#2563eb" stroke="#2563eb" stroke-width="1.8"/>
+<text x="464" y="295" font-size="24" fill="#ffffff" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">LLM 决策</text>
+<text x="464" y="336" font-size="20" fill="#e7efff" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">执行动作 / 提出答案 / 请求澄清</text>
+<text x="464" y="366" font-size="20" fill="#e7efff" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">根据当前证据修改计划</text>
+</g><rect x="950" y="281" width="65" height="27" rx="13.5" ry="13.5" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1"/>
+<text x="982.5" y="294.5" font-size="15" fill="#1d4ed8" font-weight="600" text-anchor="middle" dominant-baseline="central" letter-spacing="normal">API</text>
+<rect x="440" y="505" width="290" height="150" rx="12" ry="12" fill="#09845c" stroke="#09845c" stroke-width="1.8"/>
+<text x="464" y="540" font-size="24" fill="#ffffff" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">执行工具或流程</text>
+<text x="464" y="581" font-size="20" fill="#e2f8ec" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">校验参数，优先用缓存</text>
+<text x="464" y="611" font-size="20" fill="#e2f8ec" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">extract 按需调用模型</text>
+<rect x="790" y="505" width="250" height="150" rx="12" ry="12" fill="#f8fffa" stroke="#c6ddcf" stroke-width="1.25"/>
+<text x="814" y="540" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">更新共享状态</text>
+<text x="814" y="581" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">原文 / 抽取记录</text>
+<text x="814" y="611" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">覆盖 / 用量 / 进度</text>
+<rect x="1130" y="435" width="320" height="270" rx="12" ry="12" fill="#ecfbf2" stroke="#78bf98" stroke-width="1.25"/>
+<text x="1154" y="470" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">正常退出</text>
+<text x="1154" y="511" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">答案：引用和覆盖通过</text>
+<text x="1154" y="541" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">澄清：请求用户补充</text>
+<text x="1154" y="571" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">部分：标明证据缺口</text>
+<rect x="1150" y="640" width="280" height="40" rx="20.0" ry="20.0" fill="#d9f7e5" stroke="#09845c" stroke-width="1"/>
+<text x="1290.0" y="660.0" font-size="19" fill="#09845c" font-weight="600" text-anchor="middle" dominant-baseline="central" letter-spacing="normal">答案 · 出处 · 过程 · 用量</text>
+<rect x="430" y="755" width="620" height="145" rx="12" ry="12" fill="#fffbef" stroke="#ead4a5" stroke-width="1.25"/>
+<text x="454" y="790" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">运行约束与中断处理</text>
+<text x="454" y="831" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">调用额度、费用预算、工具步骤和重复结果检查</text>
+<text x="454" y="861" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">达到限制或连接失败 → 保存现场，返回未完成</text>
+<rect x="1130" y="785" width="320" height="160" rx="12" ry="12" fill="#fff3dd" stroke="#edbd67" stroke-width="1.25"/>
+<text x="1154" y="820" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">提前退出</text>
+<text x="1154" y="861" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">预算耗尽或连续无进展</text>
+<text x="1154" y="891" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">连接中断 / 执行失败</text>
+<text x="1154" y="921" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">保存证据和检查点</text>
+<path d="M200 280V325" fill="none" stroke="#8ba397" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#request-flow-gray)"/><path d="M200 445V490" fill="none" stroke="#8ba397" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#request-flow-gray)"/><path d="M350 365H365V125H1290V185" fill="none" stroke="#8ba397" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#request-flow-gray)"/><text x="660" y="110" font-size="18" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">不新建循环：缓存 / 已有任务 / 无效请求</text>
+<path d="M350 525H380V325H440" fill="none" stroke="#09845c" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#request-flow-green)"/><text x="225" y="470" font-size="17" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">需要执行</text>
+<path d="M350 590H440" fill="none" stroke="#09845c" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#request-flow-green)"/><text x="352" y="618" font-size="17" fill="#09845c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">快捷入口</text>
+<path d="M585 390V505" fill="none" stroke="#09845c" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#request-flow-green)"/><text x="605" y="449" font-size="20" fill="#09845c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">execute</text>
+<path d="M730 580H790" fill="none" stroke="#09845c" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#request-flow-green)"/><text x="744" y="561" font-size="17" fill="#09845c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">结果</text>
+<path d="M915 505V390" fill="none" stroke="#09845c" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#request-flow-green)"/><text x="935" y="450" font-size="19" fill="#09845c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">继续决策</text>
+<path d="M1040 315H1105V490H1130" fill="none" stroke="#8ba397" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#request-flow-gray)"/><text x="1147" y="412" font-size="18" fill="#2563eb" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">answer / clarify</text>
+<path d="M1130 570H1070V610H1040" fill="none" stroke="#8ba397" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#request-flow-gray)" stroke-dasharray="6 6"/><text x="1058" y="548" font-size="17" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">补查</text>
+<path d="M1050 825H1130" fill="none" stroke="#d18417" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#request-flow-amber)"/><text x="1062" y="804" font-size="17" fill="#d18417" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">触发</text>
+<text x="65" y="776" font-size="21" fill="#183b31" font-weight="600" text-anchor="start" dominant-baseline="central" letter-spacing="normal">两条复用途径</text>
+<text x="65" y="815" font-size="20" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">答案复用：直接返回</text>
+<text x="65" y="850" font-size="19" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">流程复用：从执行节点进入</text>
+<text x="65" y="888" font-size="19" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">复用流程仍可能调用模型</text>
+<text x="50" y="1018" font-size="18" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">实线：执行控制流</text>
+<text x="500" y="1018" font-size="18" fill="#2563eb" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">蓝色：模型决策节点</text>
+<text x="1010" y="1018" font-size="18" fill="#d18417" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">橙色：停止条件与保存现场</text>
+</svg>
+
+
+
+
+
+</div><div class="fig-caption">图 2 · 入口旁路、核心循环与退出。答案缓存和已有任务不新建循环；流程复用从执行节点进入，省去初始规划。LLM 可直接提出答案或澄清，未通过引用或覆盖检查时返回补查。</div><div class="table-scroll" tabindex="0"><table><thead><tr><th>步骤</th><th>实际动作</th><th>调用模型？</th></tr></thead><tbody><tr><td>1. 接收上下文</td><td>校验问题与范围；携带文档、最近 4 条对话（每条最多 1,500 字符）、当前章节和上一段范围。问题最多取 2,000 字符。</td><td>否</td></tr><tr><td>2. 检查答案缓存</td><td>根据问题、上下文、文档版本、模型及执行器版本定位任务；完整答案且关联流程未停用时直接返回。</td><td>命中时为 0 次</td></tr><tr><td>3. 恢复或匹配流程</td><td>恢复相同任务的检查点；新任务若有唯一、有效的启用模板，直接执行已保存步骤。</td><td>恢复与匹配本身不调用</td></tr><tr><td>4. 决定下一步</td><td>将目标、已获证据、执行结果、剩余额度和可用工具传给模型。模型可选择执行、回答或澄清。</td><td>是</td></tr><tr><td>5. 执行工具</td><td>解析结果引用，校验参数并查工具缓存。每次决策可提出 1–4 个工具调用，程序按顺序执行。</td><td>只有未命中缓存的 extract 额外调用</td></tr><tr><td>6. 更新状态</td><td>记录原文、字段记录、章节覆盖与用量，再交给模型判断是否补查。</td><td>状态更新不调用</td></tr><tr><td>7. 完成或停止</td><td>校验最终引用和覆盖要求，返回答案、出处、过程及用量；预算耗尽或重复无进展时保留检查点。</td><td>整理答案属于模型决策；没有固定追加审稿调用</td></tr></tbody></table></div><h3 class="sec-h3">动作协议：由模型生成，由程序解释执行</h3><pre><code>{
+  &quot;goal&quot;: &quot;比较两人的明确境界及时间条件&quot;,
+  &quot;plan&quot;: [&quot;检索境界描述&quot;, &quot;读取原文后比较&quot;],
+  &quot;coverage&quot;: &quot;targeted&quot;,
+  &quot;required_chapter_ids&quot;: [],
+  &quot;context_dependencies&quot;: [],
+  &quot;action&quot;: &quot;execute&quot;,
+  &quot;calls&quot;: [
+    {&quot;id&quot;: &quot;find&quot;, &quot;tool&quot;: &quot;search&quot;,
+     &quot;arguments&quot;: {&quot;query&quot;: &quot;秦宇 聂明升 境界&quot;}},
+    {&quot;id&quot;: &quot;read&quot;, &quot;tool&quot;: &quot;read&quot;,
+     &quot;arguments&quot;: {&quot;chapter_ids&quot;: &quot;$find.chapter_ids&quot;}}
+  ],
+  &quot;answer&quot;: &quot;&quot;,
+  &quot;citations&quot;: [],
+  &quot;unresolved&quot;: []
+}</code></pre><p><code>$find.chapter_ids</code> 表示使用前一步返回的章节 ID。<code>action</code> 可为 <code>execute</code>、<code>answer</code> 或 <code>clarify</code>。模型输出 JSON，由 Python 执行器解释；当前不运行模型生成的任意 Python 或 SQL。</p><div class="note "><strong>示例的性质：</strong>上面的动作仅用于说明协议，不是一次实际付费请求的日志。两个名字只参与检索参数，不决定执行流程。</div><h3 class="sec-h3">实际使用记录：试炼章节定位</h3><p>下面来自用户已经发起的一次问答，仅用于说明新执行器已接入实际请求；本文没有为此重跑问答。</p><div class="table-scroll" tabindex="0"><table><thead><tr><th>项目</th><th>执行记录</th></tr></thead><tbody><tr><td>日志目标</td><td>核实秦宇正式进入成仙门、开始试炼的章节位置及当时境界。</td></tr><tr><td>结果时间</td><td>2026-11-19 10:29:23（北京时间）</td></tr><tr><td>执行方式</td><td><code>reader-tools-v1</code> / <code>dynamic</code></td></tr><tr><td>工具动作</td><td>search → search → search → read → search → read → read，共 7 步；本地工具本身不调用模型。</td></tr><tr><td>模型用量</td><td>7 次 API；输入 112,333、输出 1,692，合计 114,025 Token。</td></tr><tr><td>费用与结论</td><td>预估 $0.297742；执行结果标为 answered。这里只确认执行路径，未逐项验证小说事实。</td></tr></tbody></table></div><div class="note "><strong>计数应分开理解：</strong>工具步骤数和模型 API 次数是两种统计。此例恰好均为 7，不表示每个 search 或 read 都调用一次模型；规划和最终生成才会产生相应模型用量。</div></section><section class="card method" id="s3"><div class="sec-head"><div class="sec-badge">03</div><div><h2>工具职责与 LLM 调用边界</h2><span class="sec-tag">Tools · 检索、证据与计算分开</span></div></div><p>工具是可以组合的能力，不是问题类别。一次问题可以多次调用同一个工具，也可以只读取少量原文后直接回答。</p><div class="table-scroll" tabindex="0"><table><thead><tr><th>工具</th><th>输入与输出</th><th>调用 LLM</th><th>实际约束</th></tr></thead><tbody><tr><td><code>catalog</code></td><td>按范围、分页浏览章节标题及摘要线索。</td><td>否</td><td>默认每页 40 章，最多 80 章。摘要是线索。</td></tr><tr><td><code>search</code></td><td>关键词与范围 → 候选章节 ID。支持原文检索或索引检索。</td><td>否</td><td>当前按短语和二字词组匹配打分；不是向量检索。候选命中不算已读完。</td></tr><tr><td><code>read</code></td><td>章节 ID、可选词组、分页位置 → 原文段落及稳定引用 ID。</td><td>否</td><td>默认每页最多 12,000 字符，上限 20,000；长单段可切成稳定小段。</td></tr><tr><td><code>scan</code></td><td>起止顺序、词组、分页位置 → 全范围的匹配原文及前后文。</td><td>否</td><td>逐章检查，包括未命中章节；分页未结束时不能冒充匹配原文已全部读取。</td></tr><tr><td><code>extract</code></td><td>已读段落 ID、字段名、抽取标准 → 带字段值和证据 ID 的记录，字段值以字符串保存。</td><td>是，缓存命中则不调用</td><td>最多 10 个字段；引用必须属于本次提供的原文。</td></tr><tr><td><code>aggregate</code></td><td>已抽取记录、过滤条件、去重字段 → 计数或排序结果。</td><td>否</td><td>只接受已记录的抽取结果；重复键的字段冲突会要求核对，不能直接编造统计输入。</td></tr><tr><td><code>workflow</code></td><td>已启用流程 ID、参数绑定 → 一组已记录的工具调用。</td><td>执行器本身不调用</td><td>内部含 extract 或后续生成时仍会调用模型。</td></tr></tbody></table></div><div class="note ok-note"><strong>扫描不消耗 Token：</strong>读取数据库、匹配关键词、切分段落和计算计数都是本地 Python 操作。只有把资料发送给模型规划、抽取或生成时，才产生模型 API 用量。</div><h3 class="sec-h3">证据怎样跟随计算结果</h3><p>原文段落保留 <code>chapter_index</code>、标题和文本，引用形如 <code>c1787p40</code>。抽取记录携带 <code>evidence_ids</code>；合并与统计保留这些出处。最终回答的引用从本轮证据集合中取出，界面可展开原文并跳回章节。</p><div class="note "><strong>章节编号：</strong>工具参数使用原稿顺序 <code>chapter_index</code>。书中标题“第 N 章”可能重复或跳号，不能直接把标题章号当作数据库顺序。</div></section><section class="card synergy" id="s4"><div class="sec-head"><div class="sec-badge">04</div><div><h2>动态计划与固定流程怎样融合</h2><span class="sec-tag">Reusable workflows · 复用步骤，不套用旧答案</span></div></div><p>新问题由模型动态安排工具调用；相似任务可复用已经积累的固定步骤。当前保存的流程是工具调用序列、参数和前后依赖，不是旧答案模板。</p><div class="fig"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+  viewBox="0 0 1500 720" width="100%" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; max-width: 1500px;">
+<defs>
+  <filter id="recipes-card-shadow" x="-5%" y="-5%" width="110%" height="115%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+    <feOffset dx="0" dy="1" result="offsetblur"/>
+    <feComponentTransfer><feFuncA type="linear" slope="0.08"/></feComponentTransfer>
+    <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <marker id="recipes-arrow-slate" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 1 L 8 5 L 0 9 z" fill="#475569"/></marker>
+  <marker id="recipes-arrow-slate-thin" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M 0 2 L 7 5 L 0 8 z" fill="#cbd5e1"/></marker>
+  <marker id="recipes-arrow-indigo" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 1 L 8 5 L 0 9 z" fill="#4f46e5"/></marker>
+  <marker id="recipes-arrow-amber" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 1 L 8 5 L 0 9 z" fill="#d97706"/></marker>
+  <marker id="recipes-arrow-emerald" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 1 L 8 5 L 0 9 z" fill="#059669"/></marker>
+</defs>
+<rect width="100%" height="100%" fill="white"/>
+<text x="750" y="49" font-size="30" fill="#183b31" font-weight="700" text-anchor="middle" dominant-baseline="central" letter-spacing="normal">从动态轨迹到可复用流程</text>
+<text x="750" y="86" font-size="20" fill="#4b675c" font-weight="400" text-anchor="middle" dominant-baseline="central" letter-spacing="normal">保存工具组合与参数引用；复用时仍使用当前证据生成答案</text>
+<defs><marker id="recipes-u-control" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L8 5L1 9Z" fill="#09845c"/></marker><marker id="recipes-u-model" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L8 5L1 9Z" fill="#2563eb"/></marker><marker id="recipes-u-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L8 5L1 9Z" fill="#8ba397"/></marker><marker id="recipes-u-stop" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L8 5L1 9Z" fill="#d18417"/></marker></defs><rect x="50" y="160" width="320" height="195" rx="12" ry="12" fill="#ffffff" stroke="#c6ddcf" stroke-width="1.25"/>
+<text x="74" y="195" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">候选流程</text>
+<text x="74" y="238" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">动态执行完成</text>
+<text x="74" y="267" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">引用有效，无未决事项</text>
+<text x="74" y="296" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">保存步骤、参数与依赖</text>
+<text x="74" y="383" font-size="18" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">candidate</text>
+<rect x="410" y="160" width="320" height="195" rx="12" ry="12" fill="#ffffff" stroke="#c6ddcf" stroke-width="1.25"/>
+<text x="434" y="195" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">启用检查</text>
+<text x="434" y="238" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">两组不同姓名取值</text>
+<text x="434" y="267" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">通过结构与引用检查</text>
+<text x="434" y="296" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">或用户标记有帮助</text>
+<text x="434" y="383" font-size="18" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">validation</text>
+<rect x="770" y="160" width="320" height="195" rx="12" ry="12" fill="#09845c" stroke="#09845c" stroke-width="1.8"/>
+<text x="794" y="195" font-size="24" fill="#ffffff" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">启用流程</text>
+<text x="794" y="238" font-size="21" fill="#e2f8ec" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">唯一匹配可直接复用</text>
+<text x="794" y="267" font-size="21" fill="#e2f8ec" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">其他问法由 LLM 选择</text>
+<text x="794" y="296" font-size="21" fill="#e2f8ec" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">有缺口时动态补查</text>
+<text x="794" y="383" font-size="18" fill="#09845c" font-weight="600" text-anchor="start" dominant-baseline="central" letter-spacing="normal">active</text>
+<rect x="1130" y="160" width="320" height="195" rx="12" ry="12" fill="#fff5df" stroke="#efc477" stroke-width="1.8"/>
+<rect x="1131" y="177" width="4" height="161" rx="2" fill="#d18417"/><text x="1154" y="195" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">停用流程</text>
+<text x="1154" y="238" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">用户标记有错误</text>
+<text x="1154" y="267" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">停用关联流程与复用</text>
+<text x="1154" y="296" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">保留原始章节数据</text>
+<text x="1154" y="383" font-size="18" fill="#d18417" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">disabled</text>
+<line x1="370" y1="258" x2="410" y2="258" stroke="#09845c" stroke-width="2.5" stroke-linecap="round" marker-end="url(#recipes-u-control)"/>
+<line x1="730" y1="258" x2="770" y2="258" stroke="#09845c" stroke-width="2.5" stroke-linecap="round" marker-end="url(#recipes-u-control)"/>
+<line x1="1090" y1="258" x2="1130" y2="258" stroke="#d18417" stroke-width="2.5" stroke-linecap="round" marker-end="url(#recipes-u-stop)"/>
+<rect x="50" y="435" width="1400" height="140" rx="12" ry="12" fill="#edfaf2" stroke="#c6ddcf" stroke-width="1.25"/>
+<text x="74" y="470" font-size="24" fill="#183b31" font-weight="700" text-anchor="start" dominant-baseline="central" letter-spacing="normal">姓名参数化：复用处理步骤</text>
+<text x="74" y="513" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">“请解释秦宇的境界” → “请解释 {{entity_0}} 的境界”</text>
+<text x="74" y="542" font-size="21" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">下一次绑定欧阳明，重新取得原文并生成答案；不会替换旧答案中的姓名。</text>
+<text x="50" y="643" font-size="19" fill="#09845c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">流程积累：已有工具的组合</text>
+<text x="570" y="643" font-size="19" fill="#4b675c" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">内容核对：使用新证据</text>
+<text x="1040" y="643" font-size="19" fill="#d18417" font-weight="500" text-anchor="start" dominant-baseline="central" letter-spacing="normal">负反馈：停止继续复用</text>
+</svg>
+
+
+
+
+</div><div class="fig-caption">图 3 · 流程的积累与复用。启用检查主要验证结构、绑定和引用，不构成独立的事实正确性审查。</div><h3 class="sec-h3">4.1 什么时候保存候选流程</h3><p>仅当动态执行完成、引用有效、没有未决事项且过程中没有记录错误时，才尝试学习。步骤必须可由现有工具重放。调用 ID 会统一命名，避免两个同构步骤因为临时命名不同而分成两个流程。</p><p>当前自动参数化主要面向已入库姓名，最多 6 个。保留问题其余措辞，用 <code>{{entity_0}}</code> 等占位符绑定人物；读取、抽取和统计所需的来源必须由前面工具结果推导。复制了旧章节或段落 ID 的流程不能直接泛化到新人物。</p><h3 class="sec-h3">4.2 什么时候省去规划调用</h3><div class="table-scroll" tabindex="0"><table><thead><tr><th>条件</th><th>执行方式</th><th>仍需做什么</th></tr></thead><tbody><tr><td>唯一的启用模板与问题匹配</td><td>校验姓名、模型版本、上下文和必要的原文版本后，直接执行步骤。</td><td>使用当前原文，最后由模型生成答案或判断缺口。</td></tr><tr><td>问法变化，或不能唯一匹配</td><td>向模型提供相关启用流程建议，由模型选择流程工具或继续动态执行。</td><td>不能仅凭名字或相似词自动触发整套流程。</td></tr><tr><td>复用步骤执行出错或需要新增动作</td><td>保留已取得的证据，回到动态补查，模式显示为 <code>workflow_fallback</code>。</td><td>补查仍受同一任务的预算约束。</td></tr></tbody></table></div><h3 class="sec-h3">4.3 启用、上下文与负反馈</h3><p>同一流程在两组不同姓名取值下通过执行与引用检查后，候选流程可启用；存在关联候选流程时，用户点击“有帮助”也可启用。无明确独立性声明的流程保留对话、章节和范围的上下文约束；存在固定来源 ID 的流程还绑定原文版本。</p><p>用户点击“有错误”会停用关联流程，停止相应答案缓存复用，并清理该次任务的模型抽取缓存。原始章节不会因此删除。停用状态不会因为后续自动积累样本而自行解除。</p><div class="note "><strong>当前能力范围：</strong>流程库积累的是已有工具的组合；没有自动编写新底层工具函数，也没有将模拟测试轨迹导入正式流程库。</div></section><section class="card resources" id="s5"><div class="sec-head"><div class="sec-badge">05</div><div><h2>上下文、任务状态与三层缓存</h2><span class="sec-tag">State & cache · 让已完成的工作可以继续使用</span></div></div><p>讨论历史帮助理解追问，不能作为原文证据。执行器保存目标、计划、上下文依赖、工具结果、原文、覆盖进度、待执行动作和累计用量。模型每次接收受长度约束的状态视图，完整状态保存在本地。</p><div class="table-scroll" tabindex="0"><table><thead><tr><th>缓存层</th><th>匹配或失效依据</th><th>对模型调用的影响</th></tr></thead><tbody><tr><td>完成答案</td><td>问题、最近历史、当前章节、范围、文档内容版本、模型身份与执行器版本。关联流程停用后不再复用。</td><td>命中后本轮 API 次数为 0；保留原生成用量供查看。</td></tr><tr><td>工具结果</td><td>工具名、已解析参数、文档版本、模型身份和工具版本。</td><td>纯本地工具免重复计算；extract 命中时可免抽取调用。</td></tr><tr><td>可复用流程</td><td>任务模板、参数绑定、上下文依赖、模型与工具版本；固定来源还检查文档版本。</td><td>减少选择和安排中间步骤的调用；通常仍需最终生成。</td></tr></tbody></table></div><h3 class="sec-h3">文档隔离与磁盘结构</h3><pre><code>文档数据库所在目录/
+└── reader_harness/
+    └── &lt;文档路径哈希&gt;/
+        ├── workflows.sqlite3          # 流程与工具结果缓存
+        ├── &lt;job_id&gt;.json              # 本轮结果、出处、用量与过程
+        ├── &lt;job_id&gt;.checkpoint.json   # 尚需恢复的执行状态
+        └── &lt;job_id&gt;.feedback.json     # 反馈记录</code></pre><p>文档版本根据章节原文、标题、摘要、情节及人物索引计算。数据变更后，旧答案与工具结果不再命中同一个内容版本。后台线程池当前一次执行一个问答任务。</p><div class="note "><strong>恢复与重发：</strong>中断后的相同任务可加载检查点，已经完成的工具不必重做。恢复保留累计用量；预算耗尽后，单纯重发相同任务不会自动获得新的预算，需要调整预算或缩小问题范围。</div></section><section class="card method" id="s6"><div class="sec-head"><div class="sec-badge">06</div><div><h2>费用预算、停止条件与证据约束</h2><span class="sec-tag">Execution limits · 以代码默认值说明</span></div></div><p>以下是 <code>Limits</code> 的代码默认值，运行时可由 <code>LUMINA_CHAT_*</code> 环境变量覆盖。模型每一步看到剩余调用次数；执行器在底层请求前检查限制，网络重试也计入物理请求次数。</p><div class="table-scroll" tabindex="0"><table><thead><tr><th>配置</th><th>默认值</th><th>含义</th></tr></thead><tbody><tr><td><code>MAX_CALLS</code></td><td>8 次</td><td>本轮物理模型请求上限，包含网络重试与 extract。</td></tr><tr><td><code>MAX_DECISIONS</code></td><td>8 轮</td><td>动态决策及最终回答轮数。</td></tr><tr><td><code>MAX_STEPS</code></td><td>24 步</td><td>成功执行的工具步骤上限，包括选择 workflow 的步骤记录。</td></tr><tr><td><code>MAX_SOURCE_CHARS</code></td><td>180,000 字符</td><td>本轮去重后加载的原文字符数预算。</td></tr><tr><td><code>MAX_INPUT_CHARS</code></td><td>60,000 字符</td><td>单次模型调用序列化输入上限，不是 Token 数。</td></tr><tr><td><code>MAX_OUTPUT_TOKENS</code></td><td>5,000 Token</td><td>单次输出上限，OpenAI Responses 的推理 Token 也包含在内。</td></tr><tr><td><code>MAX_COST_USD</code></td><td>$0.50</td><td>已知 GPT-6.1 Sol 定价下的保守预留额度；自托管 Qwen 费用仍未折算。</td></tr></tbody></table></div><p>费用控制在请求前按输入字节数、输出上限和额外格式余量预留额度；收到有效用量后按返回记录结算。未取得有效计价用量的请求保留预留额。界面费用是估算，以服务账单为准。</p><h3 class="sec-h3">何时停止或要求补充</h3><ul><li>范围不明且影响结论：模型可返回澄清问题。</li><li>引用不存在：执行器拒绝该答案，要求重新决策。</li><li>全书或范围任务未覆盖要求章节：补查，或在 <code>unresolved</code> 中明确未完成事项。</li><li>连续 3 次重复工具结果且没有新增结果，或达到预算/轮数限制：停止并保存进度。</li></ul><div class="note warn-note"><strong>覆盖检查的边界：</strong>执行器区分“按关键词逐章检索”和“完整读取章节”。已扫描每章只证明执行过指定词组检索，仍可能遗漏别名、代词和间接情节；引用存在也不证明它必然支持结论。</div><div class="note "><strong>状态含义：</strong>后台任务的 <code>status=completed</code> 表示本轮执行返回，结果仍可能为部分回答或预算停止。应结合下一节的 <code>harness.outcome</code> 判断答案是否完成。</div></section><section class="card roadmap" id="s7"><div class="sec-head"><div class="sec-badge">07</div><div><h2>接口、界面与代码修改入口</h2><span class="sec-tag">Integration · 便于主对话继续融合设计</span></div></div><div class="table-scroll" tabindex="0"><table><thead><tr><th>接口</th><th>用途</th><th>返回重点</th></tr></thead><tbody><tr><td><code>POST /api/chat</code></td><td>提交问题与上下文。</td><td>运行中返回 202 和 job_id；答案缓存命中时返回已完成结果。</td></tr><tr><td><code>GET /api/chat/jobs/&lt;id&gt;</code></td><td>轮询后台任务。</td><td>阶段进度、最终 response、timeline、usage 与 harness。</td></tr><tr><td><code>GET /api/harness/workflows</code></td><td>查看流程库。</td><td>candidate / active / disabled、模板、步骤、样本数和命中次数。</td></tr><tr><td><code>POST /api/chat/feedback</code></td><td>提交回答反馈。</td><td>参数为 job_id 与布尔 helpful；用于启用或停用流程及处理相关缓存。</td></tr><tr><td><code>GET /api/model</code></td><td>查看服务标识。</td><td>模型、提供方和 harness 版本。</td></tr></tbody></table></div><h3 class="sec-h3">界面展示哪些信息</h3><p>前端显示动态规划、读取、抽取、统计及复用阶段；回答下方可展开处理步骤，查看缓存命中、原文出处、API 次数与输入/输出 Token。返回结果也保存到当前讨论，便于切换后恢复。</p><div class="table-scroll" tabindex="0"><table><thead><tr><th>字段</th><th>当前值</th><th>读者应如何理解</th></tr></thead><tbody><tr><td><code>harness.mode</code></td><td>dynamic / workflow / workflow_fallback</td><td>分别是动态执行、流程复用、复用后动态补查。</td></tr><tr><td><code>harness.outcome</code></td><td>answered / partial / clarification / budget_exhausted</td><td>分别是有据回答、存在未决事项、澄清问题、预算或无进展停止。</td></tr><tr><td><code>usage</code></td><td>API 次数、Token、推理 Token、缓存 Token、估算费用</td><td>是本轮各步骤汇总；未返回完整用量时会标记统计不完整。</td></tr></tbody></table></div><h3 class="sec-h3">后续修改应落在哪一层</h3><div class="table-scroll" tabindex="0"><table><thead><tr><th>修改内容</th><th>对应入口</th></tr></thead><tbody><tr><td>规划协议、上下文组织、停止与完成判定</td><td><a class="source-link" href="../src/core/pipelines/novel/reader_harness.py"><code>Harness.decide / run / validate_final</code></a></td></tr><tr><td>替换召回算法或增加底层能力</td><td><a class="source-link" href="../src/core/pipelines/novel/reader_tools.py"><code>TOOLS / ReaderTools</code></a></td></tr><tr><td>流程抽象、启用规则或匹配机制</td><td><a class="source-link" href="../src/core/pipelines/novel/reader_workflows.py"><code>WorkflowStore.learn / match / select</code></a></td></tr><tr><td>任务并发、持久化、恢复、答案缓存</td><td><a class="source-link" href="../src/core/pipelines/novel/chat_runtime.py"><code>start / work / feedback</code></a></td></tr><tr><td>模型服务适配或费用记录</td><td><a class="source-link" href="../src/core/pipelines/novel/model_client.py"><code>model_client.py</code></a> / <a class="source-link" href="../src/core/pipelines/novel/usage.py"><code>usage.py</code></a></td></tr><tr><td>过程展示与交互</td><td><a class="source-link" href="../src/main.js"><code>appendExecution / appendUsage / sendChat</code></a></td></tr></tbody></table></div><div class="note "><strong>历史模块与版本维护：</strong>原有 agent.py、qa.py、retrieval.py、fact_audit.py 保留供历史任务及回归测试使用。新聊天入口不再调用原来的问题分流路径；部分通用词组处理函数仍由工具层复用。工具行为由统一 VERSION 标识，修改工具语义时应同步更新版本，避免沿用不适用的旧缓存。</div></section><section class="card deliver" id="s8"><div class="sec-head"><div class="sec-badge">08</div><div><h2>验证记录、当前边界与阅读建议</h2><span class="sec-tag">Verification · 不把离线通过当作模型效果证明</span></div></div><p>以下记录来自本轮实现交接，本文生成没有重新执行 Reader 问答测试，也没有调用付费模型。</p><div class="table-scroll" tabindex="0"><table><thead><tr><th>验证项目</th><th>已记录结果</th><th>能够说明什么</th></tr></thead><tbody><tr><td>Python 离线回归</td><td>61 项通过；模型响应均为模拟值。</td><td>覆盖动态补查、流程学习、复用、缓存失效、文档隔离、反馈、预算与恢复等执行行为。</td></tr><tr><td>前端构建及模拟联调</td><td>构建通过；桌面与手机模拟接口联调通过。</td><td>检查阶段显示、过程、缓存标记、反馈和讨论恢复；没有真实模型调用。</td></tr><tr><td>真实小说的工具扫描</td><td>原稿顺序 1738–1841，共 104 章；7 页、2,397 段、138,795 原文字符；模型请求 0 次。</td><td>验证本地扫描分页、范围覆盖和原文定位；没有验证模型理解了这些章节。</td></tr><tr><td>真实模型验收</td><td>已有用户发起的真实调用记录；尚未进行逐项事实验收。</td><td>规划是否合理、抽取和答案是否准确，需要实际使用时评估。</td></tr></tbody></table></div><div class="note warn-note"><strong>流程启用不是事实保证：</strong>两个不同参数样本通过结构和引用检查，只是当前启用条件。它没有独立证明每条陈述都正确。负反馈可以停止继续复用，仍需结合真实问题检查效果。</div><h3 class="sec-h3">当前实现仍有的边界</h3><ul><li>search 仍以关键词和二字词组匹配为主，未接入向量召回。</li><li>自动流程参数化主要处理已入库姓名；地点、时间和复杂任务约束尚未统一抽象。</li><li>复用流程是已观察到的有限步骤序列，没有自动生成新的底层代码或通用循环程序。</li><li>证据语义是否支持结论仍依赖模型理解和使用反馈，不能由引用 ID 校验替代。</li></ul><details><summary>展开：后续实际使用时可检查的事项</summary><ul class="checklist"><li><input type="checkbox" id="review-1"><label for="review-1">比较两个人的境界时，是否只检索必要证据，而非展开全书关系梳理。</label></li><li><input type="checkbox" id="review-2"><label for="review-2">追问“这个过程”时，范围是否正确；新话题是否摆脱无关旧范围。</label></li><li><input type="checkbox" id="review-3"><label for="review-3">死亡统计是否接齐身份、最终结局与去重证据，受伤或元神被收是否误计。</label></li><li><input type="checkbox" id="review-4"><label for="review-4">换人物复用流程时，是否重新取得新人物原文，未套用旧答案。</label></li><li><input type="checkbox" id="review-5"><label for="review-5">标记有误后，相关答案与流程是否停止复用。</label></li><li><input type="checkbox" id="review-6"><label for="review-6">界面是否准确区分本地扫描、模型调用与未完成的任务。</label></li></ul></details><details class="snapshot"><summary>展开：本文依据的代码快照</summary><p>源码相对项目根目录定位。哈希用于识别本文对应版本；后续主对话修改代码后，本文不会自动更新。</p><div class="table-scroll" tabindex="0"><table><thead><tr><th>源码文件</th><th>SHA-256 前 12 位</th></tr></thead><tbody><tr><td><a class="source-link" href="../src/main.js"><code>src/main.js</code></a></td><td><code>f1ae68785b2a</code></td></tr><tr><td><a class="source-link" href="../src/api/app.py"><code>src/api/app.py</code></a></td><td><code>c4a6f46f5d0f</code></td></tr><tr><td><a class="source-link" href="../src/api/documents.py"><code>src/api/documents.py</code></a></td><td><code>808516584caf</code></td></tr><tr><td><a class="source-link" href="../src/core/pipelines/novel/reader_harness.py"><code>src/core/pipelines/novel/reader_harness.py</code></a></td><td><code>62eab839ffb8</code></td></tr><tr><td><a class="source-link" href="../src/core/pipelines/novel/reader_tools.py"><code>src/core/pipelines/novel/reader_tools.py</code></a></td><td><code>ee6261a37f51</code></td></tr><tr><td><a class="source-link" href="../src/core/pipelines/novel/reader_workflows.py"><code>src/core/pipelines/novel/reader_workflows.py</code></a></td><td><code>e43a5c537e21</code></td></tr><tr><td><a class="source-link" href="../src/core/pipelines/novel/chat_runtime.py"><code>src/core/pipelines/novel/chat_runtime.py</code></a></td><td><code>9ee46e907709</code></td></tr><tr><td><a class="source-link" href="../src/core/pipelines/novel/model_client.py"><code>src/core/pipelines/novel/model_client.py</code></a></td><td><code>c80bb3878484</code></td></tr><tr><td><a class="source-link" href="../src/core/pipelines/novel/usage.py"><code>src/core/pipelines/novel/usage.py</code></a></td><td><code>ec183ed58a82</code></td></tr><tr><td><a class="source-link" href="../src/core/pipelines/novel/HARNESS.txt"><code>src/core/pipelines/novel/HARNESS.txt</code></a></td><td><code>b1e1227d829b</code></td></tr></tbody></table></div></details></section>
+<footer>生成时间：2026-11-19 10:40 CST。本文按生成时的本地源码整理，是实现说明，不是未来设计承诺或模型效果报告。<br>单文件 HTML；样式、图和交互均已内嵌，可离线阅读。源码链接需保持文档在项目 docs 目录中。</footer></main></div>
+<script>
+document.querySelector('#highlight-model').addEventListener('change',event=>document.querySelector('#main-flow').classList.toggle('model-highlight',event.target.checked));
+document.querySelector('#print').addEventListener('click',()=>window.print());
+const links=[...document.querySelectorAll('aside.toc a')];
+window.addEventListener('scroll',()=>{if(scrollY<240)links.forEach((link,i)=>link.setAttribute('aria-current',String(i===0)));},{passive:true});
+const observer=new IntersectionObserver(entries=>{for(const entry of entries){if(entry.isIntersecting){links.forEach(link=>link.setAttribute('aria-current',String(link.hash==='#'+entry.target.id)));}}},{rootMargin:'-10% 0px -65% 0px'});
+document.querySelectorAll('main section.card').forEach(section=>observer.observe(section));
+</script><script id="source-snapshot" type="application/json">{"src/main.js": "f1ae68785b2a05d95efe3d8413f4eb889407f62182f77c1945922f3bacdf6c54", "src/api/app.py": "c4a6f46f5d0f3cd7ba9ed5c83ca424435780fb30eb6dd873681c34cfcab7df7a", "src/api/documents.py": "808516584cafebe76579e3160a0b4df9383982ab591a7842ad278066ff0175ef", "src/core/pipelines/novel/reader_harness.py": "62eab839ffb874d475e3c57fa85bc3962d5db060d0122d51c251e7aa6ebf1f71", "src/core/pipelines/novel/reader_tools.py": "ee6261a37f51036916aa13a28565569008bddf999d343c7802b4d29b807aa080", "src/core/pipelines/novel/reader_workflows.py": "e43a5c537e211455d0b4c2b3f8bb0d400bc314db99b7dd6f46d46af7c81882f4", "src/core/pipelines/novel/chat_runtime.py": "9ee46e90770989164c006042f937e4c9dfb20c8b5dfa2ebbf14cfa98903f57fd", "src/core/pipelines/novel/model_client.py": "c80bb3878484b3e6e6a14f4fe996b984dd21777dc9066bb2267669454a4825ae", "src/core/pipelines/novel/usage.py": "ec183ed58a82115c59d0932607d0dfc9e54cb58a4d1b4e4dab26af80930cbb27", "src/core/pipelines/novel/HARNESS.txt": "b1e1227d829b7ee2585cd73d1fa507aa3f51fd118ad76a635b6006361e02588f"}</script></body></html>

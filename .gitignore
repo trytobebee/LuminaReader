@@ -1,5 +1,7 @@
 # Environments
 .env
+.env.*
+!.env.example
 
 # Python
 __pycache__/
@@ -15,6 +17,7 @@ venv.bak/
 
 # Node
 node_modules/
+dist/
 npm-debug.log
 yarn-error.log
 

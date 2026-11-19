@@ -1,0 +1,75 @@
+LuminaReader hybrid harness implementation — 2026-11-19
+
+Entry and responsibilities
+  POST /api/chat -> chat_runtime.start -> reader_harness.Harness.run
+  All questions enter the same loop. No person-count, location, or census router.
+  reader_tools.py provides catalog/search/read/scan/extract/aggregate.
+  The model returns a JSON action, tool calls, source citations and coverage needs.
+  The executor resolves result references ($step.field), executes bounded tools,
+  records observations, and asks for the next action or final answer.
+  Generated Python/SQL is not executed. The model can choose an active workflow
+  as a tool, and repair gaps through dynamic calls after replay.
+
+Hybrid reuse
+  Exact finished-answer cache: zero model calls, original generation usage retained.
+  Source/tool cache: tied to book-content revision, model identity, tool version
+  and resolved arguments. Extracted records can be reused across questions.
+  Successful replayable traces become candidate recipes. Names become explicit
+  parameters while literal task wording is retained. Source-dependent IDs must
+  come from prior tool results for parameterized recipes.
+  Two distinct validated parameter bindings enable a recipe; user 'helpful'
+  feedback can also enable it. This validates executable structure and citations,
+  not a mathematical guarantee of semantic accuracy.
+  One unambiguous exact task-template match can replay without a planning call.
+  Other wording: the model sees relevant active recipes and may choose one.
+  Replay still reads current evidence and generates a fresh grounded answer.
+  Failures fall back to dynamic planning with the evidence already obtained.
+  Negative feedback disables the recipe, invalidates its answer-cache reuse,
+  and evicts that run's model-extracted tool results.
+  Context-independent recipes require explicit model declaration, name bindings,
+  symbolic source dependencies, and parameterized search. Other recipes retain
+  their conversation/chapter/scope context. Literal source IDs bind to a revision.
+
+Evidence and stopping
+  Read: paged original paragraphs, stable IDs and chapter references.
+  Scan: deterministic keyword scan of every chapter in a selected range, paged
+  matching paragraphs plus neighbors. Scanning is reported separately from full
+  reading; keyword coverage can still miss aliases and indirect statements.
+  Final citations must exist in evidence actually loaded in this run.
+  Range/full-book tasks require coverage, or explicitly disclose unresolved gaps.
+  Aggregate accepts only previously extracted records; it filters/deduplicates
+  without another LLM call and refuses contradictory duplicate records.
+  Repeated results, request limits, cost reservations, source and output limits
+  bound execution. Checkpoints preserve decisions, tool outputs and usage.
+  Citation existence checks do not prove that the cited text entails a claim.
+
+Default configuration (LUMINA_CHAT_ environment variables)
+  MAX_CALLS=8                 physical requests, including transport retries
+  MAX_DECISIONS=8             planner/final-answer turns
+  MAX_STEPS=24               successful tool executions
+  MAX_SOURCE_CHARS=180000     distinct loaded original characters
+  MAX_INPUT_CHARS=60000       serialized input characters per model call
+  MAX_OUTPUT_TOKENS=5000      includes reasoning for OpenAI Responses
+  MAX_COST_USD=0.50           standard GPT-6.1 Sol conservative reservations
+  Self-hosted cost remains unpriced; call/output/source limits still apply.
+
+API and UI
+  GET /api/chat/jobs/<id>: job phases and final response, usage, provenance, trace.
+  GET /api/harness/workflows: candidate/active/disabled recipes and reuse counts.
+  POST /api/chat/feedback: {job_id, helpful: boolean}.
+  Chat displays execution summaries, cache reuse and answer feedback controls.
+  Storage: data/.../reader_harness/<document-path-hash>/; documents are isolated.
+  The old agent/qa/retrieval/fact_audit modules remain for historical artifacts
+  and offline regression tests; the chat entry no longer invokes their routing.
+
+Verification performed without paid model requests
+  61 Python tests: dynamic replanning, recipe learning/replay, semantic selection
+  interface, cache invalidation, document isolation, citations, source coverage,
+  feedback, budgets and interrupted recovery. Model responses are mocked.
+  Production frontend build passed.
+  Browser checks passed on desktop/mobile with every chat endpoint intercepted:
+  async progress, execution trace, cache labels, feedback and restored sessions.
+  Real book tool-only smoke: original indices 1738–1841, 104 chapters scanned,
+  7 pages, 2397 paragraphs, 138795 original characters, 0 model/API requests.
+  This does not validate live-model planning or answer quality. No simulated
+  recipes or answers were imported into the live workflow library.
