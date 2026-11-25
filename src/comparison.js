@@ -30,14 +30,16 @@ function renderCase(row){
  const main=document.getElementById('case-detail');main.replaceChildren();
  main.append(el('div','case-label',row.label),el('h2','question',row.question),el('p','provenance',row.comparison_scope));
  const grid=el('div','answer-grid');
- for(const [key,title] of [['v1','V1 · 历史回答'],['v2','V2 · 索引与按需取证']]){
+ for(const [key,title] of [['v1','V1 · 历史回答'],['v2',row.v2_previous?'新 V2.1 · 修复后':'V2 · 索引与按需取证']]){
   const side=row[key],panel=el('article','answer-panel '+key),head=el('div','panel-head');
   const outcome=side?.harness?.outcome;
   const status=outcome==='budget_exhausted'?'预算中止 · 未交付答案':outcome==='partial'?'已交付 · 保留未知项':outcome==='answered'?'已完成取证回答':side?.status||'待运行';
   head.append(el('h3','',title),el('span','tag',key==='v1'?'本次新增调用 0 次':side?.cache_hit?'缓存复用 · 本次新增 0 次':status));panel.append(head);
   panel.append(el('p','model',side?.model||'gpt-6.1-sol · medium'),metrics(side),markdown(side?.response));
-  if(key==='v2'&&row.v2_initial_attempt){const initial=el('details','sources');initial.append(el('summary','','首次中止与续跑记录'));
-   initial.append(el('p','','以上费用和 token 包含首次调用及续跑；耗时为两段执行时间之和，不含中间修复停顿。未提高每题 $0.50 上限。'),metrics(row.v2_initial_attempt),el('p','',row.v2_initial_attempt.response));panel.append(initial);}
+  if(key==='v2'&&row.v2_initial_attempt){const initial=el('details','sources');initial.append(el('summary','',row.repair?'本轮首次结果与修复补跑':'首次中止与续跑记录'));
+   initial.append(el('p','','以上费用和 token 包含首次调用及所有补跑；耗时为各段执行时间之和，不含中间修复停顿。未提高每题 $0.50 上限。'),metrics(row.v2_initial_attempt),el('p','',row.v2_initial_attempt.response));
+   for(const stopped of row.repair?.stopped_attempts||[])initial.append(el('p','',`中间停止记录（费用已计入上方累计值）：${money(stopped.usage?.known_cost_usd)} · ${stopped.response}`));panel.append(initial);}
+  if(key==='v2'&&row.v2_previous){const previous=el('details','sources');previous.append(el('summary','','展开旧V2：完整回答与原始用量'),metrics(row.v2_previous),markdown(row.v2_previous.response));panel.append(previous);}
   if(side?.coverage)panel.append(el('p','coverage',side.coverage));
   const structured=structuredDetails(side?.structured);if(structured)panel.append(structured);
   if(side?.timeline?.length){const detail=el('details','sources');const label=key==='v1'&&!side.timeline.some(s=>s.quotes?.length)?'历史回答的章节索引':'原文依据';detail.append(el('summary','',`${label} · ${side.timeline.length}章`));
@@ -47,9 +49,10 @@ function renderCase(row){
  main.append(grid);
  const review=el('section','review');review.append(el('h3','','准确性 · 按原文逐项核对'));
  if(row.review){review.append(el('p','',row.review.method),el('p','',row.review.summary));
-  const score=row.review.common_score;if(score)review.append(el('p','',`共同核对项：V1 ${score.v1} / ${score.total} · V2 ${score.v2} / ${score.total}`));
-  const wrap=el('div','review-table');const t=el('table');const head=el('tr');for(const text of ['核对项','V1','V2','依据与说明'])head.append(el('th','',text));t.append(head);
-  for(const item of row.review.items||[]){const tr=el('tr');for(const v of [item.criterion,item.v1_pass===null?'未评分':item.v1_pass?'通过':'有误',item.v2_pass===null?'未评分':item.v2_pass?'通过':'有误',item.note])tr.append(el('td','',v));t.append(tr);}wrap.append(t);review.append(wrap);
+  const score=row.review.common_score;if(score)review.append(el('p','',`共同核对项：V1 ${score.v1} / ${score.total}${row.v2_previous?' · 旧V2 '+score.previous_v2+' / '+score.total:''} · 新V2 ${score.v2} / ${score.total}`));
+  const wrap=el('div','review-table');const t=el('table');const head=el('tr');for(const text of ['核对项','V1',...(row.v2_previous?['旧V2']:[]),'新V2','依据与说明'])head.append(el('th','',text));t.append(head);
+  const grade=value=>value==null?'未评分':value?'通过':'有误';
+  for(const item of row.review.items||[]){const tr=el('tr');for(const v of [item.criterion,grade(item.v1_pass),...(row.v2_previous?[grade(item.previous_v2_pass)]:[]),grade(item.v2_pass),item.note])tr.append(el('td','',v));t.append(tr);}wrap.append(t);review.append(wrap);
   if(row.review.sources?.length){const sources=el('details','sources');sources.append(el('summary','','核对所用原文'));
    for(const source of row.review.sources){sources.append(el('h4','',`${source.ref} · ${source.title}`),el('blockquote','',source.text));}review.append(sources);}
  }else review.append(el('p','','尚未完成原文核对；引用地址有效不能直接证明答案准确。'));
@@ -62,13 +65,14 @@ function render(){
  const prep=report.preprocessing||{},counts=report.cases||[];
  for(const [label,value,detail] of [
   ['预处理已知费用',money(prep.settled_usd ?? prep.usage?.estimated_cost_usd),`预算上限 $10 · ${prep.completed_chapters||0} / 104章${prep.reserved_usd>0?' · '+(prep.status==='published'?'未决请求预留 ':'请求预留 ')+money(prep.reserved_usd):''}`],
-  ['V2 本次问答',money(report.totals?.v2_cost_usd),`${counts.filter(c=>c.v2?.status==='completed').length} / ${counts.length}题已完成`],
+  [report.evaluation_round?'新V2 本次问答':'V2 本次问答',money(report.totals?.v2_cost_usd),`${counts.filter(c=>c.v2?.status==='completed').length} / ${counts.length}题已完成`],
+  ...(report.evaluation_round?[['旧V2 历史问答',money(counts.reduce((sum,c)=>sum+(c.v2_previous?.usage?.estimated_cost_usd||0),0)),'复用原答案，包含原中止与续跑费用']]:[]),
   ['V1 历史生成',money(report.totals?.v1_historical_cost_usd),`${counts.length}题的历史费用，本次不再支付`],
   ['V1 本次新增','$0.0000','直接复用历史答案，不重跑']]){
   const card=el('div','total-card');card.append(el('span','metric-label',label),el('strong','',value),el('small','',detail));totals.append(card);
  }
  const scored=report.source_review;
- document.getElementById('status').textContent=(report.status_message||report.status)+(scored?` 共同要点：V1 ${scored.v1_passed} / ${scored.common_criteria}，V2 ${scored.v2_passed} / ${scored.common_criteria}。`:'' );
+ document.getElementById('status').textContent=(report.status_message||report.status)+(scored?` 共同要点：V1 ${scored.v1_passed} / ${scored.common_criteria}${scored.previous_v2_passed!=null?'，旧V2 '+scored.previous_v2_passed+' / '+scored.common_criteria:''}，新V2 ${scored.v2_passed} / ${scored.common_criteria}。`:'' );
  const notes=document.getElementById('validation-notes');notes.replaceChildren();for(const note of report.validation_notes||[])notes.append(el('p','provenance',note));
  const list=document.getElementById('case-list');list.replaceChildren();
  if(!selected||!counts.some(c=>c.id===selected))selected=counts[0]?.id;

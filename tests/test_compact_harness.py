@@ -7,7 +7,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from src.core.pipelines.novel import compact_index as index
-from src.core.pipelines.novel.compact_harness import CompactHarness, CompactTools
+from src.core.pipelines.novel.compact_harness import CompactHarness, CompactTools, VERSION
 from src.core.pipelines.novel import compact_runtime as runtime
 from src.core.pipelines.novel.reader_tools import ToolError
 from src.core.pipelines.novel.usage import request_started,record_usage,UsageLimitError
@@ -42,9 +42,9 @@ class CompactHarnessTest(TestCase):
         with patch('src.core.pipelines.novel.reader_harness.completion',side_effect=model) as paid:
             result=engine.run()
         self.assertEqual(paid.call_count,1)
-        self.assertEqual(result['harness']['version'],index.VERSION)
-        self.assertEqual(result['harness']['reading_depth'],'compact_evidence')
-        self.assertEqual(engine.state['fully_read'],[])
+        self.assertEqual(result['harness']['version'],VERSION)
+        self.assertEqual(result['harness']['reading_depth'],'focused_source')
+        self.assertEqual(engine.state['fully_read'],[1738,1739])
 
     def test_tool_cache_rehydrates_source_evidence_in_new_run(self):
         first=self.engine();second=self.engine()
@@ -69,6 +69,8 @@ class CompactHarnessTest(TestCase):
         engine=self.engine();engine.state['evidence']['c1739p0']={'chapter_index':1739,'title':'幸存','text':'念安获救，活了下来。'}
         decision={'action':'answer','answer':'确认名单','citations':['c1739p0'],'evidence_requirements':['complete_census'],'unresolved':[]}
         with self.assertRaises(ToolError):engine.validate_final(decision)
+        engine.tools.records['unknown_fate']={'id':'unknown_fate','kind':'outcome','chapter_index':1738,
+            'name':'未决人物','final_state':'unknown','unresolved':['结局尚不明确']}
         engine.state['observations']['outcomes']=engine.tools.tool_get_outcomes({},engine.state)
         with self.assertRaises(ToolError):engine.validate_final(decision)
         self.assertEqual(engine.validate_final({**decision,'unresolved':['某人身份待核，当前只列已确认名单']}),['c1739p0'])
@@ -141,7 +143,7 @@ class CompactHarnessTest(TestCase):
 
     def test_grounded_partial_answer_replays_without_another_model_job(self):
         identity=['openai','gpt-6.1-sol','medium'];question='原文是否确认？'
-        key=runtime.digest([index.VERSION,identity,str(self.path.resolve()),'revision',question,[],None,None])[:32]
+        key=runtime.digest([VERSION,identity,str(self.path.resolve()),'revision',question,[],None,None])[:32]
         target=runtime.directory(self.path);target.mkdir(parents=True)
         (target/(key+'.json')).write_text(json.dumps({'status':'completed','response':'原文尚不明确。','harness':{'outcome':'partial'},
             'usage':{'api_requests':2,'estimated_cost_usd':.02,'usage_complete':True}}))
@@ -161,3 +163,17 @@ class CompactHarnessTest(TestCase):
         self.assertIn('c1739p0',view['evidence_memory'])
         self.assertEqual(view['evidence_chapter_ids'],[1738,1739])
         self.assertEqual(sum(v.get('all_records',False) for v in view['observations'].values()),1)
+
+    def test_low_budget_reserves_a_bounded_final_delivery(self):
+        engine=self.engine();engine.settled_cost=.47;original=engine.limits
+        seen={}
+        def invoke(messages):
+            seen['cap']=engine.limits.max_output_tokens
+            seen['messages']=messages
+            return {'action':'answer','answer':'已有证据支持的结果','citations':['c1738p0']}
+        with patch('src.core.pipelines.novel.compact_harness.count_openai_input',return_value=100),patch.object(engine,'invoke',side_effect=invoke):
+            engine.decide()
+        self.assertGreaterEqual(seen['cap'],500)
+        self.assertLess(seen['cap'],5000)
+        self.assertTrue(engine.state['budget_final_delivery'])
+        self.assertIs(engine.limits,original)

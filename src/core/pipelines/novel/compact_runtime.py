@@ -9,11 +9,12 @@ import re
 import sqlite3
 from threading import Lock
 from uuid import uuid4
+from dataclasses import replace
 
 from .model_client import model_identity
 from .reader_harness import Limits, write_json
-from .compact_harness import CompactHarness as Harness
-from .compact_index import VERSION, index_path
+from .compact_harness import CompactHarness as Harness, VERSION
+from .compact_index import index_path
 from .reader_workflows import WorkflowStore, digest
 from .usage import cached_result
 from .spending import Spending
@@ -56,7 +57,7 @@ def revision(database):
     return result
 
 
-def start(database,endpoint,question,history=None,chapter=None,scope=None):
+def start(database,endpoint,question,history=None,chapter=None,scope=None,max_cost_usd=None):
     history = [{"role":row["role"],"content":row["content"][:1500]} for row in (history or [])[-4:]]
     book_revision = revision(database)
     key = digest([VERSION,model_identity(),str(Path(database).resolve()),book_revision,question,history,chapter,scope])[:32]
@@ -75,11 +76,11 @@ def start(database,endpoint,question,history=None,chapter=None,scope=None):
         if previous and previous["status"]=="running":
             return dict(previous)
         JOBS[(str(target),key)]={"job_id":key,"status":"running","phase":"planning","checked":0,"total":0}
-        POOL.submit(work,key,database,endpoint,book_revision,question,history,chapter,scope)
+        POOL.submit(work,key,database,endpoint,book_revision,question,history,chapter,scope,max_cost_usd)
         return dict(JOBS[(str(target),key)])
 
 
-def work(key,database,endpoint,book_revision,question,history,chapter,scope):
+def work(key,database,endpoint,book_revision,question,history,chapter,scope,max_cost_usd=None):
     target = directory(database)
     def progress(**changes):
         with LOCK:
@@ -103,7 +104,9 @@ def work(key,database,endpoint,book_revision,question,history,chapter,scope):
         accounting.import_history()
         with closing(sqlite3.connect(database,timeout=30)) as conn:
             conn.row_factory=sqlite3.Row
-            harness=Harness(conn,endpoint,target,book_revision,question,history,chapter,scope,
+            limits=Limits.configured()
+            if max_cost_usd is not None:limits=replace(limits,max_cost_usd=min(limits.max_cost_usd,max_cost_usd))
+            harness=Harness(conn,endpoint,target,book_revision,question,history,chapter,scope,limits=limits,
                             on_progress=progress,checkpoint=target/(key+".checkpoint.json"))
             harness.meter.on_change = capture_usage
             capture_usage()
@@ -115,7 +118,8 @@ def work(key,database,endpoint,book_revision,question,history,chapter,scope):
         with LOCK:
             JOBS[(str(target),key)]=result
         if result["harness"]["outcome"] in {"answered","clarification","partial"}:
-            (target/(key+".checkpoint.json")).unlink(missing_ok=True)
+            checkpoint=target/(key+".checkpoint.json")
+            if checkpoint.exists():checkpoint.replace(target/(key+".completed.checkpoint.json"))
     except Exception as error:
         run_status = "failed"
         capture_usage()

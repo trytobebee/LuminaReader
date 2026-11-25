@@ -19,7 +19,8 @@ from pathlib import Path
 READER_VERSION = os.getenv("LUMINA_READER_VERSION", "v1")
 if READER_VERSION == "v2":
     from src.core.pipelines.novel import compact_runtime as chat_runtime
-    from src.core.pipelines.novel.compact_index import VERSION, index_path
+    from src.core.pipelines.novel.compact_index import index_path
+    from src.core.pipelines.novel.compact_harness import VERSION
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 64 * 1024 * 1024
@@ -266,7 +267,12 @@ def chat():
         if not isinstance(scope, dict) or type(scope.get("start")) is not int or type(scope.get("end")) is not int or not 0 < scope["start"] <= scope["end"]:
             return jsonify({"response": "剧情范围无效，请重新选择章节。"}), 400
         scope = {"start": scope["start"], "end": scope["end"], "location": str(scope.get("location", ""))[:80]}
-    result = chat_runtime.start(active_database(), MODEL_BASE or "", message.strip()[:2000], history, chapter, scope)
+    options={}
+    if READER_VERSION=='v2' and 'max_cost_usd' in payload:
+        budget=payload['max_cost_usd']
+        if type(budget) not in (int,float) or not 0<budget<=.5:return jsonify({'response':'单题预算须大于0且不超过0.50美元。'}),400
+        options['max_cost_usd']=budget
+    result = chat_runtime.start(active_database(), MODEL_BASE or "", message.strip()[:2000], history, chapter, scope,**options)
     return jsonify(result), 202 if result["status"] == "running" else 200
 
 @app.get("/api/chat/jobs/<job_id>")

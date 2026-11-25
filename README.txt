@@ -154,3 +154,48 @@ review excerpts and initial stop/continuation records. Private source text,
 answer snapshots and ledgers remain under ignored data/version-comparison/.
 To continue only previously budget-stopped V2 jobs after a repair, once:
 .venv/bin/python scripts/resume_compact_comparison.py
+
+Harness repair and comparison, 2026-11-25
+----------------------------------------
+The QA harness now has a separate version (reader-compact-harness-v2.1.1), so
+changing its retrieval/runtime does not rebuild the paid preprocessing index.
+It expands event links and later entity states, filters aggregate records by
+their covered chapters, and includes scope in scope-dependent tool cache keys.
+Small source ranges are preloaded. Large reads are projected to paragraph IDs
+before context limits; raw proof, canonical fate records and story maps have
+separate durable channels. Low-budget delivery uses a counted, bounded final
+packet instead of consuming the remaining allowance on another planning loop.
+
+Private per-request inputs, decisions, usage and completed checkpoints are now
+retained for replay. Historical answers are archived before each comparison.
+The comparison page shows V1, expandable old V2 and repaired V2, plus all stop
+and repair records. No previous answer or rubric is fed into new generation.
+
+The same five questions used 543,637 tokens and USD1.454570 across 23 model
+requests, including repair attempts. Old V2 used 527,264 tokens, USD1.460031
+and 30 requests. Tokens increased 3.1%; cost is essentially unchanged. This run
+improves key coverage but does not establish a lower operating cost. All five
+questions stayed below their cumulative USD0.50 cap. No new preprocessing or
+V1 generation was made.
+
+The source review adds the previously missed explicit departure flight in
+chapter 1841, applying the same 24 key checks to all three saved versions:
+V1 21/24, old V2 18/24, repaired V2 24/24. These are targeted agent-reviewed
+items, not whole-answer or book-wide accuracy. A remaining wording issue is
+calling chapter 1739 arrival at the village entrance: it says the car is near
+the village; formal entry is in chapter 1744. The old evaluation scope comment
+incorrectly implied the departure was outside the pilot; its bounds remain
+1738-1841, and the corrected comment is recorded explicitly.
+
+100 offline tests, production build and local browser checks pass. A real
+cached replay made zero new model requests and left spending unchanged.
+Private results: data/version-comparison/v2/comparison.json and the dated
+comparison archives; validation-2026-11-25.json records the measured totals.
+
+Reproduce this round (paid only for missing new V2 results; defaults to the
+same per-question cap; prior V1 and V2 answers remain frozen):
+.venv/bin/python scripts/recompare_compact_pilot.py
+
+Explicitly repair selected failed cases within their original remaining cap:
+.venv/bin/python scripts/repair_compact_comparison.py --cases CASE_ID
+Use --resume only to continue a saved budget-stopped repair checkpoint.
